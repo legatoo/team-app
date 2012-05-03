@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Welcome</title>
+        <link type="text/css" rel="stylesheet" href="/stylesheets/login.css" />
+    </head>
+<body>
+
+    {% ifequal error "yes"%}
+        error!
+    {% endifequal %}
+    {% ifequal error "no"%}
+    {% if users%}
+    <table>
+        <tr>
+            <td>{{users.name}}</td>
+        </tr>
+        <tr>
+            <td>{{users.role}}</td>
+        </tr>
+        <tr>
+            <td>{{users.email}}</td>
+        </tr>
+    </table>
+    {% endif%}
+        <hr>
+    {% endifequal %}
+</body>
+</html>
