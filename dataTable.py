@@ -1,6 +1,7 @@
 __author__ = 'Steven_yang'
 
 from google.appengine.ext import db
+from datetime import datetime
 
 
 defaultUsers = [
@@ -15,13 +16,16 @@ defaultUsers = [
 class Team(db.Model):
     teamName = db.StringProperty(required=True)
     teamID = db.IntegerProperty(required=True)
+    teamLeader = db.StringProperty(required=True)
+    teamMember = db.ListProperty(item_type = str,required=True)
 
 class Users(db.Model):
-    reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
+    #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
     name = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
     email = db.StringProperty()
     role = db.StringProperty(required=True, choices=set(['teacher','student','TA']))
+    teamID = db.IntegerProperty(required=False)
     hasTeam = db.BooleanProperty()
     leader = db.BooleanProperty()
 
@@ -30,11 +34,15 @@ def createDefaultUsers():
     create default user table
     """
     user_count = Users.all().count(1)
+    #team_count = Team.all().count(1)
     if user_count == 0:
         for user in defaultUsers:
-            new_user = Users( reference = None, name = user[0], password = user[1],
+            new_user = Users( name = user[0], password = user[1],
                 email = user[2], role = user[3],  hasTeam = False, leader = False)
             new_user.put()
+    #if team_count == 0:
+        #adminTeam = Team(teamName='admin',teamID=0,teamLeader='qingWANG',teamMember=['qingWANG'])
+        #adminTeam.put()
 
 def addStudent(paraTuple):
     new_user = Users(name = paraTuple[0], password = paraTuple[1],
@@ -61,6 +69,16 @@ def ifUsernameOK(username):
     else:
         return True
 
+def ifTeamNameOK(teamname):
+    #team = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
+    result = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
+    return result.get()
+
+def ifHasTeam(username):
+    user = db.GqlQuery("SELECT * FROM Users where name = :1", username)
+    result = user.get()
+    return result.hasTeam
+
 def query_students():
     students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY name ASC",'student')
     result = students.fetch(10)
@@ -68,6 +86,18 @@ def query_students():
         return result
     else:
         return None
+
+def returnStuANDTeam(username):
+    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
+    fetchUser = user.get()
+    teamID =fetchUser.teamID
+    members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
+    fetchMembers = members.fetch(10)
+    team = db.GqlQuery("SELECT * FROM Team WHERE teamID = :1",teamID)
+    fetchTeam = team.get()
+
+    return (fetchMembers,fetchTeam)
+
 
 def delete_student(studentName):
     student = db.GqlQuery("SELECT * FROM Users WHERE name = :1",studentName)
@@ -78,8 +108,31 @@ def delete_student(studentName):
 def createTeam(username, teamName):
     userInfo = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
     result = userInfo.get()
-    if not result.teamID:
-        new_Team = Team(teamName = teamName)
-        new_Team.put()
+    if not result.hasTeam:
+        if not ifTeamNameOK(teamName):
+            now = datetime.now()
+            teamID = int(str(now.hour)+str(now.minute)+str(now.second))
+            teamMember = [username]
+            new_Team = Team(teamName = teamName, teamID = teamID,
+                            teamMember =teamMember,teamLeader = username)
+            #new_Team.teamName = teamName
+            #new_Team.teamID = teamID
+            #new_Team.teamMember = username
+            #new_Team.teamLeader = username
+            new_Team.put()
+            result.hasTeam = True
+            result.leader = True
+            result.teamID = teamID
+            result.put()
+            return 'success'
+        else:
+            return 'teamExisted'
+    else:
+        return 'hadTeam'
 
-        result(team = new_Team).put()
+
+def temp(teamname):
+    a = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1",teamname)
+    return a.get()
+
+

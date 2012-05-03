@@ -6,9 +6,47 @@
 
     </head>
     <body>
+    <form method="post">
+        <h1 class="label">Student Page</h1>
+        <h2 class="label">Welcome Student! {{username}}</h2>
+        {%ifequal hasTeam "no" %}
+        <div><b>You have not join a team.</b></div>
+        <div>You can create one</div>
+        <input type="hidden" name="createTeam" value="yes">
+        <input type="submit" name="submit" value="create">
+        {%endifequal%}
 
-    <h1 class="label">Student Page</h1>
-    <h2 class="label">Welcome Student! {{username}}</h2>
+        {%ifequal hasTeam "yes"%}
+        <div>You are one of this team</div>
+        <table>
+            <tr>
+                <td>teamID</td>
+                <td>{{team.teamID}}</td>
+            </tr>
+            <tr>
+                <td>team name</td>
+                <td>{{team.teamName}}</td>
+            </tr>
+            <tr>
+                <td>team leader</td>
+                <td>{{team.teamLeader}}</td>
+                <td><br></td>
+            </tr>
+            <tr><td>Members are:</td></tr>
+            <tr>
+                <th>name</th>
+                <th>email</th>
+            </tr>
+            {% for mem in members%}
+            <tr>
+                <td>{{mem.name}}</td>
+                <td>{{mem.email}}</td>
+            </tr>
+            {% endfor%}
+        </table>
+        {%endifequal%}
+    </form>
+
 
     </body>
 </html>

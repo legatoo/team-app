@@ -6,6 +6,16 @@
     </head>
     <body>
         <h1>Create Team</h1>
+    <form method="post">
+        <table>
+            <tr>
+                <td class="label">team name:</td>
+                <td><input name="teamName" value={{teamName}}></td>
+                <td class="error">{{teamNameError}}</td>
+            </tr>
 
+        </table>
+        <input type="submit" value="create">
+    </form>
     </body>
 </html>
