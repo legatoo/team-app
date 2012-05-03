@@ -3,6 +3,7 @@ __author__ = 'Steven_yang'
 import os
 
 from login import input_validation
+from dataTable import ifUsernameOK
 from dataTable import Users
 
 import webapp2
@@ -64,9 +65,13 @@ class signupHandler(webapp2.RequestHandler):
             error.roleError = 'Role is required'
 
         if not error.ifError:
-            paraTuple = (username,password,email,role)
-            addStudent(paraTuple)
-            self.redirect('/welcome?username='+username+'&password='+password)
+            if ifUsernameOK(username):
+                paraTuple = (username,password,email,role)
+                addStudent(paraTuple)
+                self.redirect('/welcome?username='+username+'&password='+password)
+            else:
+                error.username = 'You have already signed up'
+                self.render_page(username= username, email= email, role=role, error=error)
         else:
             self.render_page(username= username, email= email, role=role, error=error)
 

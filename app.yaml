@@ -19,3 +19,6 @@ handlers:
 
 - url: /signup
   script: signup.app
+
+- url: /createteam
+  script: createTeam.app

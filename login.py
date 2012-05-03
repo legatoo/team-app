@@ -10,6 +10,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from dataTable import createDefaultUsers
+from dataTable import user_validation
 
 regexDic = { 'username':r'^[a-zA-Z0-9_-]{3,20}$',
              'password':r'^.{3,20}$',
@@ -19,20 +20,6 @@ regexDic = { 'username':r'^[a-zA-Z0-9_-]{3,20}$',
 def input_validation(tuple):
     REGEX = re.compile(regexDic[tuple[0]])
     return REGEX.match(tuple[1])
-
-def user_validation(username,password):
-    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1 AND password = :2"
-                    ,username,password)
-    result = user.get()
-    template_values = {}
-    if result:
-        template_values['haveUser'] = 'yes'
-        template_values['user'] = result
-        #template_values['userKey'] = user
-    else:
-        template_values['haveUser'] = 'no'
-    return template_values
-
 
 class loginHandler(webapp2.RequestHandler):
     """

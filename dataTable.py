@@ -34,3 +34,22 @@ def createDefaultUsers():
             new_user.put()
 
 
+def user_validation(username,password):
+    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1 AND password = :2"
+        ,username,password)
+    result = user.get()
+    template_values = {}
+    if result:
+        template_values['haveUser'] = 'yes'
+        template_values['user'] = result
+        #template_values['userKey'] = user
+    else:
+        template_values['haveUser'] = 'no'
+    return template_values
+
+def ifUsernameOK(username):
+    result = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
+    if result:
+        return False
+    else:
+        return True
