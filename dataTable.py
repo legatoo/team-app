@@ -11,17 +11,20 @@ defaultUsers = [
     ('lianDUAN','duan123456','duanlian@what.com','student'),
     ('xinHAO','hao123456','haoxin@example.com','student')
 ]
+
+class Team(db.Model):
+    teamName = db.StringProperty(required=True)
+    teamID = db.IntegerProperty(required=True)
+
 class Users(db.Model):
+    reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
     name = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
     email = db.StringProperty()
     role = db.StringProperty(required=True, choices=set(['teacher','student','TA']))
-    teamID = db.IntegerProperty()
+    hasTeam = db.BooleanProperty()
     leader = db.BooleanProperty()
 
-class Team(db.Model):
-    teamID = db.IntegerProperty(required=True)
-    members = db.StringListProperty(required=True)
 def createDefaultUsers():
     """
     create default user table
@@ -29,10 +32,14 @@ def createDefaultUsers():
     user_count = Users.all().count(1)
     if user_count == 0:
         for user in defaultUsers:
-            new_user = Users(name = user[0], password = user[1],
-                email = user[2], role = user[3], leader = False)
+            new_user = Users( reference = None, name = user[0], password = user[1],
+                email = user[2], role = user[3],  hasTeam = False, leader = False)
             new_user.put()
 
+def addStudent(paraTuple):
+    new_user = Users(name = paraTuple[0], password = paraTuple[1],
+        email = paraTuple[2], role = paraTuple[3], leader = False, hasTeam = False)
+    new_user.put()
 
 def user_validation(username,password):
     user = db.GqlQuery("SELECT * FROM Users WHERE name = :1 AND password = :2"
@@ -53,3 +60,26 @@ def ifUsernameOK(username):
         return False
     else:
         return True
+
+def query_students():
+    students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY name ASC",'student')
+    result = students.fetch(10)
+    if result:
+        return result
+    else:
+        return None
+
+def delete_student(studentName):
+    student = db.GqlQuery("SELECT * FROM Users WHERE name = :1",studentName)
+    result = student.get()
+    #key = result.getkey()
+    db.delete(result)
+
+def createTeam(username, teamName):
+    userInfo = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
+    result = userInfo.get()
+    if not result.teamID:
+        new_Team = Team(teamName = teamName)
+        new_Team.put()
+
+        result(team = new_Team).put()

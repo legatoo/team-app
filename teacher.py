@@ -5,20 +5,11 @@ import  webapp2
 
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from dataTable import query_students
+from dataTable import delete_student
 
-def query_students():
-    students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY name ASC",'student')
-    result = students.fetch(10)
-    if result:
-        return result
-    else:
-        return None
 
-def delete_student(studentName):
-    student = db.GqlQuery("SELECT * FROM Users WHERE name = :1",studentName)
-    result = student.get()
-    #key = result.getkey()
-    db.delete(result)
+
 
 
 class teacherHanlder(webapp2.RequestHandler):

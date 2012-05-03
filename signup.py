@@ -4,7 +4,7 @@ import os
 
 from login import input_validation
 from dataTable import ifUsernameOK
-from dataTable import Users
+from dataTable import addStudent
 
 import webapp2
 from google.appengine.ext.webapp import template
@@ -17,10 +17,7 @@ class Error():
 def ifTwoPasswordSame(pw1,pw2):
     return pw1 == pw2
 
-def addStudent(paraTuple):
-    new_user = Users(name = paraTuple[0], password = paraTuple[1],
-                     email = paraTuple[2], role = paraTuple[3], leader = False)
-    new_user.put()
+
 
 class signupHandler(webapp2.RequestHandler):
     def render_page(self,username = '',email='', role = '',message = 'User Sign Up',
