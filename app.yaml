@@ -5,12 +5,14 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /
+  script: login.app
 
 - url: /login
   script: login.app
 
-- url: /welcome
-  script: login.app
+- url: /student
+  script: student.app
 
 - url: /teacher
   script: teacher.app

@@ -22,15 +22,15 @@ def input_validation(tuple):
 
 def user_validation(username,password):
     user = db.GqlQuery("SELECT * FROM Users WHERE name = :1 AND password = :2"
-        ,username,password)
+                    ,username,password)
     result = user.get()
     template_values = {}
     if result:
-        template_values['error'] = 'no'
+        template_values['haveUser'] = 'yes'
         template_values['user'] = result
         #template_values['userKey'] = user
     else:
-        template_values['error'] = 'yes'
+        template_values['haveUser'] = 'no'
     return template_values
 
 
@@ -38,16 +38,19 @@ class loginHandler(webapp2.RequestHandler):
     """
     user login handler
     """
-    def render_page(self, username='',errors=None):
+    def render_page(self, username='',haveUser='yes', errors=None):
         form = os.path.join(os.path.dirname(__file__),'templates/login.html')
         template_values = {}
-        template_values['username'] = username
-        if errors:
+        if haveUser == 'no':
+            template_values['haveUser'] = haveUser
+        else:
             template_values['username'] = username
-            if 'usernameError' in errors:
-                template_values['usernameError'] = errors['usernameError']
-            if 'passwordError' in errors:
-                template_values['passwordError'] = errors['passwordError']
+            if errors:
+                template_values['username'] = username
+                if 'usernameError' in errors:
+                    template_values['usernameError'] = errors['usernameError']
+                if 'passwordError' in errors:
+                    template_values['passwordError'] = errors['passwordError']
         renderForm = template.render(form,template_values)
         self.response.out.write(renderForm)
 
@@ -67,31 +70,17 @@ class loginHandler(webapp2.RequestHandler):
         if errors:
             self.render_page(username=username,errors=errors)
         else:
-            #templateValues = user_validation(username,password)
-            self.redirect('/welcome?username='+username+'&password='+password)
+            templateValues = user_validation(username,password)
+            if templateValues['haveUser'] == 'yes':
+                if templateValues['user'].role == 'teacher':
+                    self.redirect('/teacher?username=' + username)
+                if templateValues['user'].role == 'student':
+                    self.redirect('/student?username=' + username)
+            if templateValues['haveUser'] == 'no':
+                self.render_page(haveUser='no')
 
 
-class welcomeHandler(webapp2.RequestHandler):
-    def get(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-        templateValues = user_validation(username,password)
-        form = os.path.join(os.path.dirname(__file__),'templates/welcome.html')
-        if templateValues['error'] == 'no':
-            if templateValues['user'].role == 'teacher':
-                self.redirect('/teacher?username='+templateValues['user'].name)
-            else:
-                templateValues['userKey'] = templateValues['user'].key()
-                renderForm = template.render(form,templateValues)
-                self.response.out.write(renderForm)
-        else:
-            renderForm = template.render(form,templateValues)
-            self.response.out.write(renderForm)
-
-
-app = webapp2.WSGIApplication([('/login', loginHandler),
-    ('/welcome',welcomeHandler)],
-    debug=True)
+app = webapp2.WSGIApplication([('/login', loginHandler)],debug=True)
 
 def main():
 

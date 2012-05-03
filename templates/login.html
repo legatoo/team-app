@@ -7,6 +7,7 @@
     </head>
     <body>
         <h1>Log in</h1>
+
         <form  method="post">
             <table>
                 <tr>
@@ -23,6 +24,13 @@
             </table>
             <input type="submit" value="Login">
         </form>
+        <hr>
+
+        {% ifequal haveUser "no"%}
+        <div class="error"><b>No such user! return to login again! OR you can sign up a account.</b></div>
+        <br>
+        <a href="signup">sign up</a>
+        {% endifequal %}
 
 
 
