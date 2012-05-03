@@ -71,11 +71,5 @@ class signupHandler(webapp2.RequestHandler):
             self.render_page(username= username, email= email, role=role, error=error)
 
 
-
-
-
-
-
-
 app = webapp2.WSGIApplication([('/signup',signupHandler)],debug=True)
 
