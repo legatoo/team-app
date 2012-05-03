@@ -39,15 +39,18 @@ class teacherHanlder(webapp2.RequestHandler):
         self.render_page()
 
     def post(self):
-        ifDelete = self.request.get('delete')
-        addUser = self.request.get('addUser')
-        if ifDelete == 'yes':
-            deleteTarget = self.request.get('deleteTarget')
-            delete_student(deleteTarget)
-            self.render_page()
-        if addUser == 'yes':
-            messge = 'Add A New Student'
-            self.redirect('/signup?message='+messge)
+        submit = self.request.get('submit')
+        if submit == 'Delete':
+            ifDelete = self.request.get('delete')
+            if ifDelete == 'yes':
+                deleteTarget = self.request.get('deleteTarget')
+                delete_student(deleteTarget)
+                self.render_page()
+        if submit == 'Add Student':
+            addUser = self.request.get('addUser')
+            if addUser == 'yes':
+                messge = 'Add A New Student'
+                self.redirect('/signup?message='+messge)
 
 
 
