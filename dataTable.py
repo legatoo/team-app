@@ -34,15 +34,11 @@ def createDefaultUsers():
     create default user table
     """
     user_count = Users.all().count(1)
-    #team_count = Team.all().count(1)
     if user_count == 0:
         for user in defaultUsers:
             new_user = Users( name = user[0], password = user[1],
                 email = user[2], role = user[3],  hasTeam = False, leader = False)
             new_user.put()
-    #if team_count == 0:
-        #adminTeam = Team(teamName='admin',teamID=0,teamLeader='qingWANG',teamMember=['qingWANG'])
-        #adminTeam.put()
 
 def addStudent(paraTuple):
     new_user = Users(name = paraTuple[0], password = paraTuple[1],
