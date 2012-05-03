@@ -22,12 +22,18 @@ def addStudent(paraTuple):
     new_user.put()
 
 class signupHandler(webapp2.RequestHandler):
-    def render_page(self,username = '',email='', role = '',error = None):
-        form = os.path.join(os.path.dirname(__file__),'templates/signup.html')
+    def render_page(self,username = '',email='', role = '',message = 'User Sign Up',
+                    error = None):
+        messageTeacher = self.request.get('message')
         templateValues = {'username':username,
                           'email':email,
                           'role':role,
+                          'message':message,
                           'error':error}
+        if messageTeacher:
+            templateValues['message'] = messageTeacher
+        form = os.path.join(os.path.dirname(__file__),'templates/signup.html')
+
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
