@@ -8,22 +8,30 @@
 <body>
 
     {% ifequal error "yes"%}
-        error!
+        <div class="error">No such user! return to login again! OR you can sign up a account.</div>
+        <br>
+        <a href="login">return</a>
+        <br>
+        <a herf="signup">sign up</a>
     {% endifequal %}
     {% ifequal error "no"%}
-    {% if users%}
+    {% if user%}
     <table>
         <tr>
-            <td>{{users.name}}</td>
+            <td>{{user.name}}</td>
         </tr>
         <tr>
-            <td>{{users.role}}</td>
+            <td>{{user.role}}</td>
         </tr>
         <tr>
-            <td>{{users.email}}</td>
+            <td>{{user.email}}</td>
+        </tr>
+        <tr>
+            <td>{{userKey}}</td>
         </tr>
     </table>
     {% endif%}
+
         <hr>
     {% endifequal %}
 </body>

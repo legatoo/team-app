@@ -16,8 +16,12 @@ class Users(db.Model):
     password = db.StringProperty(required=True)
     email = db.StringProperty()
     role = db.StringProperty(required=True, choices=set(['teacher','student','TA']))
+    teamID = db.IntegerProperty()
     leader = db.BooleanProperty()
 
+class Team(db.Model):
+    teamID = db.IntegerProperty(required=True)
+    members = db.StringListProperty(required=True)
 def createDefaultUsers():
     """
     create default user table

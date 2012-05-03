@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Teacher Page</title>
+        <link type="text/css" rel="stylesheet" href="/stylesheets/teacher.css" />
+    </head>
+    <body>
+    <h1 class="label">Teacher Page</h1>
+    <h2 class="label">Welcome teacher! {{username}}</h2>
+    <form method="post">
+        <table class="showUser">
+            <tr>
+                <td>student name</td>
+                <td>teamID</td>
+                <td>leader</td>
+                <td>email</td>
+            </tr>
+            {% if students%}
+            {% for student in students%}
+            <tr>
+                <td>{{student.name}}</td>
+                <td>{{student.teamID}}</td>
+                <td>{{student.leader}}</td>
+                <td>{{student.email}}</td>
+                <td>
+                    <input type="hidden" name="delete" value="yes">
+                    <input type="hidden" name="deleteTarget" value={{student.name}}>
+                    <input type="submit" value="delete">
+                </td>
+            </tr>
+            {% endfor%}
+            {% endif%}
+            <div class="error">{{error}}</div>
+        </table>
+    </form>
+    </body>
+</html>

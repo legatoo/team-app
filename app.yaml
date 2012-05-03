@@ -12,3 +12,5 @@ handlers:
 - url: /welcome
   script: login.app
 
+- url: /teacher
+  script: teacher.app
