@@ -5,8 +5,42 @@
      <title>Sign up</title>
     </head>
     <body>
+        <h1>User sign up</h1>
         <form method="post">
-            
+            <table>
+                <tr>
+                    <td>username: </td>
+                    <td><input type="text" name="username" value={{username}}></td>
+                    {% if error%}<td><div class="error"><b>{{error.username}}</b></div> </td>{% endif%}
+                </tr>
+
+                <tr>
+                    <td>password: </td>
+                    <td><input type="password" name="password" ></td>
+                    {% if error%}<td><div class="error"><b>{{error.password}}</b></div> </td>{% endif%}
+                </tr>
+
+                <tr>
+                    <td>password again: </td>
+                    <td><input type="password" name="pwAgain" ></td>
+                    {% if error%}<td><div class="error"><b>{{error.pwAgain}}</b></div> </td>{% endif%}
+                </tr>
+
+                <tr>
+                    <td>email: </td>
+                    <td><input type="text" name="email" value={{email}}></td>
+                    {% if error%}<td><div class="error"><b>{{error.email}}</b></div> </td>{% endif%}
+                </tr>
+
+                <tr>
+                    <td>choice role: </td>
+                    <td><input type="checkbox" name="role" value="student" checked="checked"/> student</td>
+                    <td><input type="checkbox" name="role" value="teacher" /> teacher </td>
+                    {% if error%}<td><div class="error"><b>{{error.role}}</b></div> </td>{% endif%}
+                </tr>
+            </table>
+            <br>
+            <input type="submit" value="sign up">
         </form>
     </body>
 </html>

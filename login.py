@@ -13,6 +13,7 @@ from dataTable import createDefaultUsers
 
 regexDic = { 'username':r'^[a-zA-Z0-9_-]{3,20}$',
              'password':r'^.{3,20}$',
+             'email':r'^[\S]+@[\S]+\.[\S]+$'
              }
 
 def input_validation(tuple):
