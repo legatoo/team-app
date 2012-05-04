@@ -17,7 +17,7 @@ class Team(db.Model):
     teamName = db.StringProperty(required=True)
     teamID = db.IntegerProperty(required=True)
     teamLeader = db.StringProperty(required=True)
-    teamMember = db.ListProperty(item_type = str,required=True)
+    teamMember = db.StringListProperty(required=True)
 
 class Users(db.Model):
     #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
@@ -79,7 +79,7 @@ def query_students():
     """
     return all students
     """
-    students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY name ASC",'student')
+    students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY teamID DESC",'student')
     result = students.fetch(10)
     if result:
         return result
@@ -94,14 +94,16 @@ def query_teams():
     return teams
 
 def returnStuANDTeam(username):
-    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
-    fetchUser = user.get()
-    teamID =fetchUser.teamID
+    #user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
+    #fetchUser = user.get()
+    #teamID =fetchUser.teamID
+    #members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
+    #fetchMembers = members.fetch(10)
+    team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username)
+    fetchTeam = team.get()
+    teamID = fetchTeam.teamID
     members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
     fetchMembers = members.fetch(10)
-    team = db.GqlQuery("SELECT * FROM Team WHERE teamID = :1",teamID)
-    fetchTeam = team.get()
-
     return (fetchMembers,fetchTeam)
 
 
@@ -110,6 +112,38 @@ def delete_student(studentName):
     result = student.get()
     #key = result.getkey()
     db.delete(result)
+
+def quitTeam(username):
+    team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username).get()
+    user = Users.all().filter('teamID = ', team.teamID).get()
+    if team and user:
+        if len(team.teamMember) == 1:
+            team.delete()
+            user.hasTeam = False
+            user.teamID = 0
+            user.leader = False
+            user.put()
+
+        else:
+            members = filter(lambda a: a!= username,team.teamMember)
+            team.teamMember = members
+            user.hasTeam = False
+            user.teamID = 0
+            
+            if user.leader == True:
+                user.leader = False
+                nextUser = Users.all().filter('name = ',members[0]).get()
+                nextUser.leader = True
+                team.teamLeader = nextUser.name
+                nextUser.put()
+            user.put()
+            team.put()
+        return True
+    else:
+        return False
+
+
+
 
 def createTeam(username, teamName):
     userInfo = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
@@ -121,10 +155,7 @@ def createTeam(username, teamName):
             teamMember = [username]
             new_Team = Team(teamName = teamName, teamID = teamID,
                             teamMember =teamMember,teamLeader = username)
-            #new_Team.teamName = teamName
-            #new_Team.teamID = teamID
-            #new_Team.teamMember = username
-            #new_Team.teamLeader = username
+
             new_Team.put()
             result.hasTeam = True
             result.leader = True
@@ -155,8 +186,5 @@ def addMember(teamID,username):
         return 'fail'
 
 
-def temp(teamname):
-    a = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1",teamname)
-    return a.get()
 
 

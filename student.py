@@ -8,10 +8,11 @@ from dataTable import ifHasTeam
 from dataTable import returnStuANDTeam
 from dataTable import query_teams
 from dataTable import addMember
+from dataTable import quitTeam
 
 class studentHandler(webapp2.RequestHandler):
 
-    def render_page(self,message='',teamID=''):
+    def render_page(self,message1='',message2='',teamID=''):
         templateValues = {}
         form  = os.path.join(os.path.dirname(__file__),'templates/student.html')
         username = self.request.get('username')
@@ -19,7 +20,8 @@ class studentHandler(webapp2.RequestHandler):
             templateValues['hasTeam'] = 'no'
             teams = query_teams()
             templateValues['teams'] = teams
-            templateValues['message'] = message
+            templateValues['message1'] = message1
+
             templateValues['teamID'] = teamID
         else:
             templateValues['hasTeam'] = 'yes'
@@ -27,6 +29,7 @@ class studentHandler(webapp2.RequestHandler):
             templateValues['team'] = team
             templateValues['members'] = members
         templateValues['username'] = username
+        templateValues['message2'] = message2
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
 
@@ -41,9 +44,14 @@ class studentHandler(webapp2.RequestHandler):
         if submit == 'join':
             teamID = self.request.get('joinTarget')
             if addMember(teamID,username) == 'fail':
-                self.render_page(message='join failed!',teamID=teamID)
+                self.render_page(message1='join failed!',teamID=teamID)
             else:
-                self.render_page(message='join success!')
+                self.render_page(message1='join success!')
+        if submit == 'quit':
+            if quitTeam(username):
+                self.render_page(message2='quit success!')
+            else:
+                self.render_page(message2='quit failed!')
 
 
 

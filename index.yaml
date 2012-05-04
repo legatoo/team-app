@@ -14,3 +14,14 @@ indexes:
   properties:
   - name: role
   - name: name
+
+- kind: Users
+  properties:
+  - name: role
+  - name: teamID
+
+- kind: Users
+  properties:
+  - name: role
+  - name: teamID
+    direction: desc

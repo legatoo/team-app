@@ -5,7 +5,7 @@ import webapp2
 from google.appengine.ext.webapp import template
 
 from dataTable import createTeam
-from dataTable import temp
+
 
 class createdTeamHandler(webapp2.RequestHandler):
     def render_page(self,teamName='',error=''):

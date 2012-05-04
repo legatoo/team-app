@@ -8,10 +8,6 @@ from google.appengine.ext.webapp import template
 from dataTable import query_students
 from dataTable import delete_student
 
-
-
-
-
 class teacherHanlder(webapp2.RequestHandler):
     def render_page(self):
         templateValues = {}
@@ -42,7 +38,6 @@ class teacherHanlder(webapp2.RequestHandler):
             if addUser == 'yes':
                 messge = 'Add A New Student'
                 self.redirect('/signup?message='+messge)
-
 
 
 app = webapp2.WSGIApplication([('/teacher',teacherHanlder)],debug=True)
