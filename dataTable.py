@@ -76,12 +76,22 @@ def ifHasTeam(username):
     return result.hasTeam
 
 def query_students():
+    """
+    return all students
+    """
     students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY name ASC",'student')
     result = students.fetch(10)
     if result:
         return result
     else:
         return None
+
+def query_teams():
+    """
+    return all teams
+    """
+    teams = Team.all().fetch(15)
+    return teams
 
 def returnStuANDTeam(username):
     user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
@@ -125,6 +135,24 @@ def createTeam(username, teamName):
             return 'teamExisted'
     else:
         return 'hadTeam'
+
+def addMember(teamID,username):
+    user = db.GqlQuery("SELECT * FROM Users WHERE name =:1", username)
+    userResult = user.get()
+    teamID = int(teamID)
+
+    teamResult = Team.all().filter('teamID = ',teamID).get()
+
+    if teamResult and userResult:
+        userResult.teamID = int(teamID)
+        userResult.hasTeam = True
+        teamMember =teamResult.teamMember
+        teamMember.append(username)
+        teamResult.teamMember = teamMember
+        teamResult.put()
+        userResult.put()
+    else:
+        return 'fail'
 
 
 def temp(teamname):

@@ -14,7 +14,35 @@
         <div>You can create one</div>
         <input type="hidden" name="createTeam" value="yes">
         <input type="submit" name="submit" value="create">
+        <hr>
+        {% if teams%}
+
+        <div>Or you can join one team below</div>
+        <table>
+            <tr>
+                <th>teamID</th>
+                <th>team name</th>
+                <th>team leader</th>
+            </tr>
+            {%for team in teams%}
+            <tr>
+                <td>{{team.teamID}}</td>
+                <td>{{team.teamName}}</td>
+                <td>{{team.teamLeader}}</td>
+
+                <td>
+                    <input type="hidden" name="joinTarget" value={{team.teamID}}>
+                    <input type="submit" name="submit" value="join">
+                </td>
+                <td>{{message}}</td>
+                <td>{{teamID}}</td>
+
+            </tr>
+            {%endfor%}
+        </table>
+        {% endif%}
         {%endifequal%}
+
 
         {%ifequal hasTeam "yes"%}
         <div>You are one of this team</div>
