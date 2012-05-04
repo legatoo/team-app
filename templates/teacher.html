@@ -35,9 +35,29 @@
             {% endif%}
             <div class="error">{{error}}</div>
         </table>
-        <hr>
+        <br>
         <input type="hidden" name="addUser" value="yes">
         <input type="submit" name="submit" value="Add Student">
+        <hr>
+        <div>Release an assignment, click HERE!</div>
+        <input type="submit" name="submit" value="releaseAssignment">
     </form>
+    <hr>
+    {%if assignments%}
+        {%for assignment in assignments%}
+            <div>Assignment name:  {{assignment.assignmentName}}</div>
+            <div>Release time:  {{assignment.releaseTime}}</div>
+            <div>Due Date:  {{assignment.deadLine}}</div>
+            <div>Tags:
+
+            {% for tag in assignment.tags%}
+                {{tag.tagName}}
+                {% endfor%}
+            </div>
+            <br>
+            <pre>{{assignment.content}}</pre>
+            <hr>
+        {%endfor%}
+    {% endif%}
     </body>
 </html>

@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Release Assignment</title>
+    </head>
+    <body>
+        <h1>Release Assignment</h1>
+        <h2>{{username}},here you can release an assignment to students or teams</h2>
+        <form method="post">
+            <table>
+                <tr>
+                    <td>Assignment name:</td>
+                    <td><input type="text" name="assignmentName" value={{assignmentName}}></td>
+                    <td>{{assignmentNameError}}</td>
+                </tr>
+
+                <tr>
+                    <td>Tag:</td>
+                    {%if tags%}
+                        {% for tag in tags%}
+                            <td><input type="checkbox" name="tagNames" value={{tag.tagName}}>{{tag.tagName}}</td>
+                        {% endfor%}
+                    {%else%}
+                    <td><input type="text" name="tagNames" value={{tagName}}></td>
+                    {%endif%}
+                </tr>
+
+                <tr>
+                    <td>Receiver:</td>
+                    <td><input type="radio" name="receiver" value="public">public</td>
+                    <td><input type="radio" name="receiver" value="team">team</td>
+                </tr>
+
+                <tr>
+                    <td>DeaeLine:</td>
+                    <td><input type="text" name="year">year</td>
+                    <td><input type="text" name="month">month</td>
+                    <td><input type="text" name="day">day</td>
+                </tr>
+            </table>
+            <div>Assignment Requirement</div>
+            <textarea name="assignmentContent" rows="16" cols="100">{{assignmentContent|escape}}</textarea>
+            <br>
+            <br>
+            <input type="submit" value="Release">
+        </form>
+
+    </body>
+</html>

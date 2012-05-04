@@ -29,6 +29,21 @@ class Users(db.Model):
     hasTeam = db.BooleanProperty()
     leader = db.BooleanProperty()
 
+class Assignment(db.Model):
+    reference = db.ReferenceProperty(Users, collection_name='assignments', required=True)
+    assignmentName = db.StringProperty(required=True)
+    #tag = db.StringProperty(required=True)
+    receivers = db.StringListProperty(required= True)
+    content = db.TextProperty()
+    deadLine = db.DateTimeProperty(required=True)
+    releaseTime = db.DateTimeProperty(auto_now_add=True)
+
+
+class Tag(db.Model):
+    reference = db.ReferenceProperty(Assignment,collection_name='tags', required=True)
+    tagName = db.StringProperty(required=True)
+
+
 def createDefaultUsers():
     """
     create default user table
@@ -70,6 +85,11 @@ def ifTeamNameOK(teamname):
     result = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
     return result.get()
 
+def ifAssignmentNameOK(assignmentName):
+    #team = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
+    result = db.GqlQuery("SELECT * FROM Assignment WHERE assignmentName = :1", assignmentName)
+    return result.get()
+
 def ifHasTeam(username):
     user = db.GqlQuery("SELECT * FROM Users where name = :1", username)
     result = user.get()
@@ -92,6 +112,20 @@ def query_teams():
     """
     teams = Team.all().fetch(15)
     return teams
+
+def query_assigments():
+    """
+    return all assignments
+    """
+    assignments = Assignment.all().fetch(20)
+    return assignments
+
+def query_tags():
+    """
+    return all tags
+    """
+    tags = Tag.all().fetch(20)
+    return tags
 
 def returnStuANDTeam(username):
     #user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
@@ -129,7 +163,7 @@ def quitTeam(username):
             team.teamMember = members
             user.hasTeam = False
             user.teamID = 0
-            
+
             if user.leader == True:
                 user.leader = False
                 nextUser = Users.all().filter('name = ',members[0]).get()
@@ -141,8 +175,6 @@ def quitTeam(username):
         return True
     else:
         return False
-
-
 
 
 def createTeam(username, teamName):
@@ -185,6 +217,36 @@ def addMember(teamID,username):
     else:
         return 'fail'
 
+def createAssignment(paraDictionary):
+    creator = Users.all().filter('name = ',paraDictionary['username']).get()
+    receivers = []
+    if paraDictionary['receiver'] == 'public':
+        users = Users.all()
+        for user in users:
+            receivers.append(user.name)
+    if paraDictionary['receiver'] == 'team':
+        teams = Team.all()
+        for team in teams:
+            receivers += team.teamMember
+
+    new_assignment = Assignment(
+        reference=creator,
+        assignmentName=paraDictionary['assignmentName'],
+        #tag = paraDictionary['tagName'],
+        receivers = receivers,
+        content = paraDictionary['assignmentContent'],
+        deadLine = paraDictionary['deadline']
+    )
+    new_assignment.put()
+    createTag(paraDictionary['tagNames'],new_assignment)
+
+def createTag(tagList, assignment):
+    for tag in tagList:
+        newTag = Tag(
+            reference = assignment,
+            tagName = tag
+        )
+        newTag.put()
 
 
 

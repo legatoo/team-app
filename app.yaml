@@ -17,8 +17,12 @@ handlers:
 - url: /teacher
   script: teacher.app
 
+- url: /releaseassignment
+  script: teacher.app
+
 - url: /signup
   script: signup.app
 
 - url: /createteam
   script: createTeam.app
+
