@@ -5,6 +5,7 @@ import webapp2
 from google.appengine.ext.webapp import template
 
 from dataTable import createTeam
+from dataTable import updateAssignmentTeam
 
 
 class createdTeamHandler(webapp2.RequestHandler):
@@ -24,6 +25,7 @@ class createdTeamHandler(webapp2.RequestHandler):
         teamName = self.request.get('teamName')
         flag = createTeam(username,teamName)
         if flag == 'success':
+            updateAssignmentTeam(username,'join')
             self.redirect('/student?username='+username)
         if flag == 'teamExisted':
             error = 'Team has already existed!'

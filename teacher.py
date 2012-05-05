@@ -14,6 +14,7 @@ from dataTable import query_tags
 from dataTable import ifAssignmentNameOK
 from dataTable import createAssignment
 from dataTable import query_assigments
+from dataTable import updateAssignment
 
 def tagDigest(tags):
     tagList = tags.split(';')
@@ -109,10 +110,33 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
 class editAssignmentHandler(webapp2.RequestHandler):
     def get(self):
         self.render_page()
-    def render_page(self):
-        pass
+
+    def render_page(self,error = ''):
+        form = os.path.join(os.path.dirname(__file__),'templates/editassignment.html')
+        templateValues = {}
+        assignmentName = self.request.get('assignmentName')
+        assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+        templateValues['assignment'] = assignment
+        templateValues['error'] = error
+        renderPage = template.render(form,templateValues)
+        self.response.out.write(renderPage)
+
+    def post(self):
+        deadLine = datetime( int(self.request.get('year')),
+            int(self.request.get('month')),
+            int(self.request.get('day')))
+        now = datetime.now()
+        if deadLine < now:
+            self.render_page(error='Due time invalid!')
+        else:
+            assignmentName = self.request.get('assignmentName')
+            assignmentContent = self.request.get('assignmentContent')
+            updateAssignment(assignmentName,deadLine,assignmentContent)
+            self.redirect('/teacher')
+
+
 
 
 app = webapp2.WSGIApplication([('/teacher',teacherHanlder),
                                ('/releaseassignment',releaseAssignmentHandler),
-                               ('editassignment',editAssignmentHandler)],debug=True)
+                               ('/editassignment',editAssignmentHandler)],debug=True)

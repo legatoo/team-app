@@ -3,12 +3,15 @@ __author__ = 'Steven_yang'
 import os
 
 import webapp2
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from dataTable import Assignment
 from dataTable import ifHasTeam
 from dataTable import returnStuANDTeam
 from dataTable import query_teams
 from dataTable import addMember
 from dataTable import quitTeam
+from dataTable import updateAssignmentTeam
 
 class studentHandler(webapp2.RequestHandler):
 
@@ -21,13 +24,16 @@ class studentHandler(webapp2.RequestHandler):
             teams = query_teams()
             templateValues['teams'] = teams
             templateValues['message1'] = message1
-
+            assignments = db.GqlQuery("SELECT * FROM Assignment WHERE pubOrTeam = :1",'public')
             templateValues['teamID'] = teamID
         else:
             templateValues['hasTeam'] = 'yes'
             (members,team) = returnStuANDTeam(username)
             templateValues['team'] = team
             templateValues['members'] = members
+            assignments = Assignment.all()
+
+        templateValues['assignments'] = assignments
         templateValues['username'] = username
         templateValues['message2'] = message2
         renderForm = template.render(form,templateValues)
@@ -40,15 +46,18 @@ class studentHandler(webapp2.RequestHandler):
         username = self.request.get('username')
         submit = self.request.get('submit')
         if submit == 'create':
+
             self.redirect('/createteam?username='+username)
         if submit == 'join':
             teamID = self.request.get('joinTarget')
             if addMember(teamID,username) == 'fail':
                 self.render_page(message1='join failed!',teamID=teamID)
             else:
+                updateAssignmentTeam(username,'join')
                 self.render_page(message1='join success!')
         if submit == 'quit':
             if quitTeam(username):
+                updateAssignmentTeam(username,'quit')
                 self.render_page(message2='quit success!')
             else:
                 self.render_page(message2='quit failed!')

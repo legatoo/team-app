@@ -78,11 +78,30 @@
         <div>If you want to quit this team, click this button:</div>
         <input type="submit" name="submit" value="quit">
         {%endifequal%}
-    </form>
+
     <br>
     <br>
     <a href="/login">Sign out</a>
+    <hr>
+    {%if assignments%}
+    {%for assignment in assignments%}
 
+    <div>Assignment name:  {{assignment.assignmentName}}</div>
+    <div>Release time:  {{assignment.releaseTime}}</div>
+    <div>Due Date:  {{assignment.deadLine}}</div>
+    <div>Tags:</div>
+
+    {% for tag in assignment.tags%}
+    <div>{{tag.tags.tagName}} x {{tag.tags.tagAmount}}</div>
+    {% endfor%}
+
+    <br>
+    <pre>{{assignment.content}}</pre>
+
+    <hr>
+    {%endfor%}
+    {% endif%}
+    </form>
 
     </body>
 </html>

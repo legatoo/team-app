@@ -37,6 +37,7 @@ class Assignment(db.Model):
     content = db.TextProperty()
     deadLine = db.DateTimeProperty(required=True)
     releaseTime = db.DateTimeProperty(auto_now_add=True)
+    pubOrTeam = db.StringProperty(required=True)
 
 
 class Tag(db.Model):
@@ -237,20 +238,20 @@ def createAssignment(paraDictionary):
         teams = Team.all()
         for team in teams:
             receivers += team.teamMember
-
-
     new_assignment = Assignment(
         reference=creator,
         assignmentName=paraDictionary['assignmentName'],
         receivers = receivers,
         content = paraDictionary['assignmentContent'],
         deadLine = paraDictionary['deadline'],
+        pubOrTeam = paraDictionary['receiver']
     )
     new_assignment.put()
     for tagName in paraDictionary['tagNames']:
         tag = createTag(tagName)
         assignmentTag = AssignmentKey(assignments = new_assignment,tags = tag)
         assignmentTag.put()
+
 
 def createTag(tagName):
     tag =  ifTagNameOK(tagName)
@@ -265,6 +266,24 @@ def createTag(tagName):
         tag.tagAmount += 1
         tag.put()
         return tag
+
+def updateAssignment(assignmentName,deadLine,assignmentContent):
+    assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+    assignment.deadLine = deadLine
+    assignment.content = assignmentContent
+    assignment.put()
+
+def updateAssignmentTeam(username,quitOrJoin):
+    if quitOrJoin == 'join':
+        assignments = db.GqlQuery("SELECT * FROM Assignment WHERE pubOrTeam = :1",'team').fetch(20)
+        for assignment in assignments:
+            assignment.receivers.append(username)
+            assignment.put()
+    if quitOrJoin == 'quit':
+        assignments = db.GqlQuery("SELECT * FROM Assignment WHERE pubOrTeam = :1",'team').fetch(20)
+        for assignment in assignments:
+            assignment.receivers = filter(lambda a: a!= username,assignment.receivers)
+            assignment.put()
 
 
 
