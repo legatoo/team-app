@@ -5,7 +5,9 @@ from datetime import  datetime
 
 import  webapp2
 
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from dataTable import Assignment
 from dataTable import query_students
 from dataTable import delete_student
 from dataTable import query_tags
@@ -53,6 +55,12 @@ class teacherHanlder(webapp2.RequestHandler):
         if submit == 'releaseAssignment':
             username = self.request.get('username')
             self.redirect('/releaseassignment?username='+username)
+        if submit == 'editAssignment':
+            assignmentName = self.request.get('editTarget')
+            now = datetime.now()
+            deadLine = Assignment.all().filter('assignmentName = ',assignmentName).get().deadLine
+            if now < deadLine:
+                self.redirect('/editassignment?assignmentName='+assignmentName)
 
 
 class releaseAssignmentHandler(webapp2.RequestHandler):
@@ -77,6 +85,8 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
         username = self.request.get('username')
         assignmentName = self.request.get('assignmentName')
         tagNames = tagDigest(str(self.request.get('tagNames')))
+        #checkboxTagNames = self.request.getlist('checkboxTagNames')
+        #tagNames += checkboxTagNames
         receiver = self.request.get('receiver')
         deadline = datetime( int(self.request.get('year')),
                              int(self.request.get('month')),
@@ -88,15 +98,21 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                 'username':username,
                 'assignmentName':assignmentName,
                 'tagNames':tagNames,
+                #'tagNames':checkboxTagNames,
                 'receiver':receiver,
                 'deadline':deadline,
-                'assignmentContent':assignmentContent
+                'assignmentContent':assignmentContent,
             }
             createAssignment(paraDictionary)
         self.redirect('/teacher?username='+username)
 
-
+class editAssignmentHandler(webapp2.RequestHandler):
+    def get(self):
+        self.render_page()
+    def render_page(self):
+        pass
 
 
 app = webapp2.WSGIApplication([('/teacher',teacherHanlder),
-                               ('/releaseassignment',releaseAssignmentHandler)],debug=True)
+                               ('/releaseassignment',releaseAssignmentHandler),
+                               ('editassignment',editAssignmentHandler)],debug=True)

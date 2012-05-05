@@ -17,14 +17,9 @@
 
                 <tr>
                     <td>Tag:</td>
-                    {%if tags%}
-                        {% for tag in tags%}
-                            <td><input type="checkbox" name="tagNames" value={{tag.tagName}}>{{tag.tagName}}</td>
-                        {% endfor%}
-                    {%else%}
                     <td><input type="text" name="tagNames" value={{tagName}}></td>
-                    {%endif%}
                 </tr>
+
 
                 <tr>
                     <td>Receiver:</td>
@@ -33,7 +28,7 @@
                 </tr>
 
                 <tr>
-                    <td>DeaeLine:</td>
+                    <td>DeadLine:</td>
                     <td><input type="text" name="year">year</td>
                     <td><input type="text" name="month">month</td>
                     <td><input type="text" name="day">day</td>

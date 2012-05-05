@@ -20,6 +20,9 @@ handlers:
 - url: /releaseassignment
   script: teacher.app
 
+- url: /editassignment
+  script: teacher.app
+
 - url: /signup
   script: signup.app
 

@@ -42,20 +42,25 @@
         <div>Release an assignment, click HERE!</div>
         <input type="submit" name="submit" value="releaseAssignment">
     </form>
+    <br>
+    <a href="/login">Sign out</a>
     <hr>
     {%if assignments%}
         {%for assignment in assignments%}
             <div>Assignment name:  {{assignment.assignmentName}}</div>
             <div>Release time:  {{assignment.releaseTime}}</div>
             <div>Due Date:  {{assignment.deadLine}}</div>
-            <div>Tags:
+            <div>Tags:</div>
 
             {% for tag in assignment.tags%}
-                {{tag.tagName}}
+                <div>{{tag.tags.tagName}} x {{tag.tags.tagAmount}}</div>
                 {% endfor%}
             </div>
             <br>
             <pre>{{assignment.content}}</pre>
+            <br>
+            <input type="hidden" name="editTarget" value={{assignment.assignmentName}}>
+            <input type="submit" name="submit" value="editAssignment">
             <hr>
         {%endfor%}
     {% endif%}

@@ -40,8 +40,13 @@ class Assignment(db.Model):
 
 
 class Tag(db.Model):
-    reference = db.ReferenceProperty(Assignment,collection_name='tags', required=True)
+    #reference = db.ReferenceProperty(Assignment,collection_name='tags', required=True)
     tagName = db.StringProperty(required=True)
+    tagAmount = db.IntegerProperty()
+
+class AssignmentKey(db.Model):
+    assignments = db.ReferenceProperty(Assignment,collection_name="tags",required=True)
+    tags = db.ReferenceProperty(Tag,collection_name="assignments",required=True)
 
 
 def createDefaultUsers():
@@ -88,6 +93,10 @@ def ifTeamNameOK(teamname):
 def ifAssignmentNameOK(assignmentName):
     #team = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
     result = db.GqlQuery("SELECT * FROM Assignment WHERE assignmentName = :1", assignmentName)
+    return result.get()
+
+def ifTagNameOK(tagName):
+    result = db.GqlQuery("SELECT * FROM Tag WHERE tagName = :1", tagName)
     return result.get()
 
 def ifHasTeam(username):
@@ -229,24 +238,36 @@ def createAssignment(paraDictionary):
         for team in teams:
             receivers += team.teamMember
 
+
     new_assignment = Assignment(
         reference=creator,
         assignmentName=paraDictionary['assignmentName'],
-        #tag = paraDictionary['tagName'],
         receivers = receivers,
         content = paraDictionary['assignmentContent'],
-        deadLine = paraDictionary['deadline']
+        deadLine = paraDictionary['deadline'],
     )
     new_assignment.put()
-    createTag(paraDictionary['tagNames'],new_assignment)
+    for tagName in paraDictionary['tagNames']:
+        tag = createTag(tagName)
+        assignmentTag = AssignmentKey(assignments = new_assignment,tags = tag)
+        assignmentTag.put()
 
-def createTag(tagList, assignment):
-    for tag in tagList:
+def createTag(tagName):
+    tag =  ifTagNameOK(tagName)
+    if not tag:
         newTag = Tag(
-            reference = assignment,
-            tagName = tag
+            tagName = tagName,
+            tagAmount = 1
         )
         newTag.put()
+        return newTag
+    else:
+        tag.tagAmount += 1
+        tag.put()
+        return tag
+
+
+
 
 
 
