@@ -1,5 +1,7 @@
 __author__ = 'Steven_yang'
 
+import random
+
 from google.appengine.ext import db
 from datetime import datetime
 
@@ -51,6 +53,21 @@ class AssignmentKey(db.Model):
     assignments = db.ReferenceProperty(Assignment,collection_name="tags",required=True)
     tags = db.ReferenceProperty(Tag,collection_name="assignments",required=True)
 
+class UplaodWork(db.Model):
+    users = db.ReferenceProperty(Users,collection_name="works",required=True)
+    assignments = db.ReferenceProperty(Assignment,collection_name="works",required=True)
+    teams = db.ReferenceProperty(Team,collection_name="works",required=True)
+    uploadID = db.IntegerProperty(required=True)
+    assignmentName = db.StringProperty(required=True)
+    author = db.StringProperty(required=True)
+    title = db.StringProperty(required=True)
+    version = db.StringProperty(required=True)
+    votes = db.IntegerProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
+    description = db.TextProperty(required=True)
+
+
+
 class Comments(db.Model):
     assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=True)
     users = db.ReferenceProperty(Users,collection_name="comments",required=True)
@@ -58,6 +75,7 @@ class Comments(db.Model):
     title = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
+    uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
 
 
 def createDefaultUsers():
@@ -153,12 +171,13 @@ def returnStuANDTeam(username):
     #teamID =fetchUser.teamID
     #members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
     #fetchMembers = members.fetch(10)
+    user = Users.all().filter('name = ',username).get()
     team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username)
     fetchTeam = team.get()
     teamID = fetchTeam.teamID
     members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
     fetchMembers = members.fetch(10)
-    return (fetchMembers,fetchTeam)
+    return (fetchMembers,fetchTeam,user)
 
 
 def delete_student(studentName):
@@ -168,8 +187,10 @@ def delete_student(studentName):
     db.delete(result)
 
 def quitTeam(username):
-    team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username).get()
-    user = Users.all().filter('teamID = ', team.teamID).get()
+    #team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username).get()
+    #user = Users.all().filter('teamID = ', team.teamID).get()
+    user = Users.all().filter('name = ',username).get()
+    team = Team.all().filter('teamID = ',user.teamID).get()
     if team and team.lock == True:
         return 'lock'
     elif  team and user:
@@ -319,5 +340,35 @@ def createComment(paraDic):
         title = paraDic['title']
     )
     new_comment.put()
+
+def createUploadWork(paraDic):
+    user = Users.all().filter('name = ',paraDic['username']).get()
+    assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
+
+    team = Team.all().filter('teamID = ',user.teamID).get()
+    new_uploadWork = UplaodWork(
+        users = user,
+        assignments = assignment,
+        teams = team,
+        assignmentName = assignment.assignmentName,
+        author = user.name,
+        uploadID = user.teamID+random.randrange(1001),
+        title = paraDic['title'],
+        version = paraDic['version'],
+        description = paraDic['description'],
+        votes = 0
+    )
+    new_uploadWork.put()
+
+
+def voteWork(vote):
+    votes = vote.split('+')
+    work = UplaodWork.all().filter('uploadID = ',int(votes[1])).get()
+    if votes[0] == 'up':
+        work.votes += 1
+    if votes[0] == 'down':
+        work.votes -= 1
+    work.put()
+
 
 

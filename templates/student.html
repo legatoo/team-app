@@ -84,6 +84,8 @@
     <br>
     <a href="/login">Sign out</a>
     <hr>
+
+    <hr>
     {%if assignments%}
     {%for assignment in assignments%}
 
@@ -98,10 +100,37 @@
     {% for tag in assignment.tags%}
         <div><a href="/tagcollection?tagName={{tag.tags.tagName}}&username={{username}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
     {% endfor%}
+    <br>
+    {%ifequal assignment.pubOrTeam "team"%}
+    <div>You have uploaded these works:</div>
+    {%endifequal%}
+    <br>
+
+        {%for work in uploadWorks%}
+        {% ifequal work.assignmentName assignment.assignmentName %}
+
+        <div>author: {{work.author}}</div>
+        <div>Title: {{work.title}}</div>
+        <div>Version: {{work.version}}</div>
+        <div>Description: {{work.description}}</div>
+        <div>Upload time: {{work.date}}</div>
+        <div>Vote: {{work.votes}}</div>
+        <input type="hidden" name="voteUp" value="up+{{work.uploadID}}">
+        <input type="submit" name="submit" value="voteUp">
+        <input type="hidden" name="voteDown" value="down+{{work.uploadID}}">
+        <input type="submit" name="submit" value="voteDown">
+        {% endifequal%}
+        {%endfor%}
+        {%ifequal assignment.pubOrTeam "team"%}
+    <div>Upload your homework</div>
+    <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
+    <input type="submit" name="submit" value="upload">
+        {%endifequal%}
 
     <hr>
     {%endfor%}
     {% endif%}
+
     </form>
 
     </body>

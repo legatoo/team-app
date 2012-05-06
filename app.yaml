@@ -35,4 +35,7 @@ handlers:
 - url: /assignmentwall
   script: tagCollection.app
 
+- url: /upload
+  script: upload.app
+
 
