@@ -51,6 +51,14 @@ class AssignmentKey(db.Model):
     assignments = db.ReferenceProperty(Assignment,collection_name="tags",required=True)
     tags = db.ReferenceProperty(Tag,collection_name="assignments",required=True)
 
+class Comments(db.Model):
+    assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=True)
+    users = db.ReferenceProperty(Users,collection_name="comments",required=True)
+    author = db.StringProperty(required=True)
+    title = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
+
 
 def createDefaultUsers():
     """
@@ -300,5 +308,16 @@ def lockTeam(teamID):
     team.lock = True
     team.put()
 
+def createComment(paraDic):
+    author = Users.all().filter('name = ',paraDic['username']).get()
+    assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
+    new_comment = Comments(
+        assignments = assignment,
+        users = author,
+        author = author.name,
+        content = paraDic['content'],
+        title = paraDic['title']
+    )
+    new_comment.put()
 
 

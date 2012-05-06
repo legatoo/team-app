@@ -87,15 +87,16 @@
     {%if assignments%}
     {%for assignment in assignments%}
 
-        <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}">
+        <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}&username={{username}}">
             Assignment name:  {{assignment.assignmentName}}</a>
         </div>
     <div>Release time:  {{assignment.releaseTime}}</div>
     <div>Due Date:  {{assignment.deadLine}}</div>
+    <div>Receivers: {{assignment.pubOrTeam}}</div>
     <div>Tags:</div>
 
     {% for tag in assignment.tags%}
-        <div><a href="/tagcollection?tagName={{tag.tags.tagName}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
+        <div><a href="/tagcollection?tagName={{tag.tags.tagName}}&username={{username}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
     {% endfor%}
 
     <hr>

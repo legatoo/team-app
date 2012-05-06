@@ -5,6 +5,7 @@
         <title>Assignment Wall</title>
     </head>
     <body>
+        <form method="post">
         {% if assignment%}
         <h1>{{assignment.assignmentName}}</h1>
         {% for tag in assignment.tags%}
@@ -15,6 +16,26 @@
         <div>Due date: {{assignment.deadLine}}</div>
         <div>Content:</div>
         <pre>{{assignment.content}}</pre>
+
+            <div>Add a comment:</div>
+            <div>Title: <input type="text" name="title"></div>
+            <div>Comment:</div>
+            <br>
+            <textarea rows="5" cols="50" name="content"></textarea>
+            <br>
+            <input type="submit" value="comment">
+            <hr>
+
+            {%for comment in assignment.comments%}
+            <div>Title: {{comment.title}}</div>
+            <div>Author: {{comment.author}}</div>
+            <div>Time: {{comment.date}}</div>
+            <br>
+            <pre>{{comment.content}}</pre>
+            <hr>
+            {%endfor%}
+
         {%endif%}
+        </form>
     </body>
 </html>
