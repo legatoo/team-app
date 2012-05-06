@@ -29,3 +29,10 @@ handlers:
 - url: /createteam
   script: createTeam.app
 
+- url: /tagcollection
+  script: tagCollection.app
+
+- url: /assignmentwall
+  script: tagCollection.app
+
+

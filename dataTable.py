@@ -33,6 +33,7 @@ class Users(db.Model):
 class Assignment(db.Model):
     reference = db.ReferenceProperty(Users, collection_name='assignments', required=True)
     assignmentName = db.StringProperty(required=True)
+    author = db.StringProperty(required=True)
     #tag = db.StringProperty(required=True)
     receivers = db.StringListProperty(required= True)
     content = db.TextProperty()
@@ -247,6 +248,7 @@ def createAssignment(paraDictionary):
     new_assignment = Assignment(
         reference=creator,
         assignmentName=paraDictionary['assignmentName'],
+        author = creator.name,
         receivers = receivers,
         content = paraDictionary['assignmentContent'],
         deadLine = paraDictionary['deadline'],

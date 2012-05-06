@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Tag Collection</title>
+    </head>
+    <body>
+        <h1>Tag Collection</h1>
+        {% if tag%}
+
+        <h1>Tag: {{tag.tagName}}</h1>
+        <h2>Tag Heat:{{tag.tagAmount}}</h2>
+        {% for assignment in tag.assignments%}
+        <a href="/assignmentwall?assignmentName={{assignment.assignments.assignmentName}}">
+            {{assignment.assignments.assignmentName}}
+        </a>
+        <div>Author: {{assignment.assignments.author}}</div>
+        <div>Receiver: {{assignment.assignments.pubOrTeam}}</div>
+        <div>Release time: {{assignment.assignments.deadLine}}</div>
+        <hr>
+        {% endfor%}
+        {% endif%}
+
+    </body>
+</html>
