@@ -50,17 +50,24 @@ class studentHandler(webapp2.RequestHandler):
             self.redirect('/createteam?username='+username)
         if submit == 'join':
             teamID = self.request.get('joinTarget')
-            if addMember(teamID,username) == 'fail':
+            joinResult = addMember(teamID,username)
+            if  joinResult == 'fail':
                 self.render_page(message1='join failed!',teamID=teamID)
+            elif joinResult == 'lock':
+                self.render_page(message1='team locked',teamID=teamID)
             else:
                 updateAssignmentTeam(username,'join')
                 self.render_page(message1='join success!')
         if submit == 'quit':
-            if quitTeam(username):
+            quitResult = quitTeam(username)
+            if quitResult == 'lock':
+                self.render_page(message2='team has been locked!')
+            if quitResult == 'successQuit':
                 updateAssignmentTeam(username,'quit')
                 self.render_page(message2='quit success!')
-            else:
+            if quitResult == 'fail':
                 self.render_page(message2='quit failed!')
+
 
 
 

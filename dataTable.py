@@ -18,6 +18,7 @@ class Team(db.Model):
     teamID = db.IntegerProperty(required=True)
     teamLeader = db.StringProperty(required=True)
     teamMember = db.StringListProperty(required=True)
+    lock = db.BooleanProperty(required=True)
 
 class Users(db.Model):
     #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
@@ -110,7 +111,7 @@ def query_students():
     return all students
     """
     students = db.GqlQuery("SELECT * FROM Users WHERE role = :1 ORDER BY teamID DESC",'student')
-    result = students.fetch(10)
+    result = students.fetch(50)
     if result:
         return result
     else:
@@ -160,7 +161,9 @@ def delete_student(studentName):
 def quitTeam(username):
     team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username).get()
     user = Users.all().filter('teamID = ', team.teamID).get()
-    if team and user:
+    if team and team.lock == True:
+        return 'lock'
+    elif  team and user:
         if len(team.teamMember) == 1:
             team.delete()
             user.hasTeam = False
@@ -182,9 +185,9 @@ def quitTeam(username):
                 nextUser.put()
             user.put()
             team.put()
-        return True
+        return 'successQuit'
     else:
-        return False
+        return 'fail'
 
 
 def createTeam(username, teamName):
@@ -196,7 +199,7 @@ def createTeam(username, teamName):
             teamID = int(str(now.hour)+str(now.minute)+str(now.second))
             teamMember = [username]
             new_Team = Team(teamName = teamName, teamID = teamID,
-                            teamMember =teamMember,teamLeader = username)
+                            teamMember =teamMember,teamLeader = username,lock = False)
 
             new_Team.put()
             result.hasTeam = True
@@ -215,8 +218,11 @@ def addMember(teamID,username):
     teamID = int(teamID)
 
     teamResult = Team.all().filter('teamID = ',teamID).get()
+    #teamResult = db.GqlQuery("SELECT * FROM Team WHERE teamID = :1 AND lock = :2",teamID,False)
+    if teamResult and teamResult.lock == True:
+        return 'lock'
 
-    if teamResult and userResult:
+    elif  teamResult and userResult:
         userResult.teamID = int(teamID)
         userResult.hasTeam = True
         teamMember =teamResult.teamMember
@@ -286,7 +292,11 @@ def updateAssignmentTeam(username,quitOrJoin):
             assignment.put()
 
 
-
+def lockTeam(teamID):
+    #team = Team.all().filter('teamID = ',teamID).get()
+    team = db.GqlQuery("SELECT * FROM Team WHERE teamID = :1",int(teamID)).get()
+    team.lock = True
+    team.put()
 
 
 

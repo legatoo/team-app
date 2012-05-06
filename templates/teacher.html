@@ -42,7 +42,35 @@
         <div>Release an assignment, click HERE!</div>
         <input type="submit" name="submit" value="releaseAssignment">
 
-    <br>
+    <hr>
+        {% if teams%}
+
+        <div>Your course has teams:</div>
+        <table>
+            <tr>
+                <th>teamID</th>
+                <th>team name</th>
+                <th>team leader</th>
+                <th>team lock</th>
+            </tr>
+            {%for team in teams%}
+            <tr>
+                <td>{{team.teamID}}</td>
+                <td>{{team.teamName}}</td>
+                <td>{{team.teamLeader}}</td>
+                <td>{{team.lock}}</td>
+
+                <td>
+                    <input type="hidden" name="lockTarget" value={{team.teamID}}>
+                    <input type="submit" name="submit" value="lock">
+                </td>
+                <td>{{message}}</td>
+
+            </tr>
+            {%endfor%}
+        </table>
+        {% endif%}
+
     <a href="/login">Sign out</a>
     <hr>
     {%if assignments%}

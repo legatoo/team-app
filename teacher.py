@@ -15,24 +15,31 @@ from dataTable import ifAssignmentNameOK
 from dataTable import createAssignment
 from dataTable import query_assigments
 from dataTable import updateAssignment
+from dataTable import query_teams
+from dataTable import lockTeam
+
 
 def tagDigest(tags):
     tagList = tags.split(';')
     return tagList
 
 class teacherHanlder(webapp2.RequestHandler):
-    def render_page(self):
+    def render_page(self,message = ''):
         templateValues = {}
         username = self.request.get('username')
         templateValues['username'] = username
         students = query_students()
         assignments = query_assigments()
+        teams = query_teams()
         if students:
             templateValues['students'] = students
         else:
             templateValues['error'] = 'No available student'
         if assignments:
             templateValues['assignments'] = assignments
+        if teams:
+            templateValues['teams'] = teams
+            templateValues['message'] = message
         form = os.path.join(os.path.dirname(__file__),'templates/teacher.html')
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
@@ -62,6 +69,10 @@ class teacherHanlder(webapp2.RequestHandler):
             deadLine = Assignment.all().filter('assignmentName = ',assignmentName).get().deadLine
             if now < deadLine:
                 self.redirect('/editassignment?assignmentName='+assignmentName)
+        if submit == 'lock':
+            lockTarget = self.request.get('lockTarget')
+            lockTeam(lockTarget)
+            self.render_page(message = 'team locked!')
 
 
 class releaseAssignmentHandler(webapp2.RequestHandler):

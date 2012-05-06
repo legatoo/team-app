@@ -10,7 +10,7 @@
     <form method="post">
         <h1 class="label">Student Page</h1>
         <h2 class="label">Welcome Student! {{username}}</h2>
-        <div>{{message2}}</div>
+
         {%ifequal hasTeam "no" %}
         <div><b>You have not join a team.</b></div>
         <div>You can create one</div>
@@ -77,6 +77,7 @@
         <hr>
         <div>If you want to quit this team, click this button:</div>
         <input type="submit" name="submit" value="quit">
+        <div>{{message2}}</div>
         {%endifequal%}
 
     <br>
