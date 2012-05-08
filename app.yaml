@@ -38,4 +38,7 @@ handlers:
 - url: /upload
   script: upload.app
 
+- url: /team
+  script: team.app
+
 

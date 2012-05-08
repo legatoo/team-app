@@ -33,11 +33,17 @@
                 <td>{{team.teamLeader}}</td>
 
                 <td>
+
+                    {%if team.lock%}
+                    <td>Team has been locked!</td>
+                    {%else%}
                     <input type="hidden" name="joinTarget" value={{team.teamID}}>
                     <input type="submit" name="submit" value="join">
+                    <td>{{message1}}</td>
+                    {%endif%}
                 </td>
-                <td>{{message1}}</td>
-                <td>{{teamID}}</td>
+
+
 
             </tr>
             {%endfor%}
@@ -122,9 +128,11 @@
         {% endifequal%}
         {%endfor%}
         {%ifequal assignment.pubOrTeam "team"%}
-    <div>Upload your homework</div>
-    <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
-    <input type="submit" name="submit" value="upload">
+            <div>---------------------------------------------------</div>
+            <div>Upload or Download your teamWork</div>
+            <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
+            <input type="submit" name="submit" value="upload">
+            <input type="submit" name="submit" value="download">
         {%endifequal%}
 
     <hr>

@@ -6,7 +6,8 @@
     </head>
     <body>
         <h1>Submit your work, {{username}}</h1>
-        <form method="post">
+        {{upload_url}}
+        <form   action={{upload_url}} method="post" enctype="multipart/form-data">
             <table>
                 <tr>
                     <td>Title: </td>
@@ -21,6 +22,15 @@
                 <tr>
                     <td>Description: </td>
                     <td><textarea name="uploadDescription" rows="5" cols="40"></textarea></td>
+                </tr>
+
+                <tr>
+                    <td>Upload your source code: </td>
+                    <td><input type="file" name="file"></td>
+                </tr>
+
+                <tr>
+                    <td></td>
                 </tr>
 
             </table>

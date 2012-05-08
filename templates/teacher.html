@@ -59,12 +59,23 @@
                 <td>{{team.teamName}}</td>
                 <td>{{team.teamLeader}}</td>
                 <td>{{team.lock}}</td>
-
+            </tr>
+            <tr>
+                <td>Menmers of this team: </td>
+                <td>{%for mem in team.teamMember%}
+                {{mem}},
+                {%endfor%}</td>
+            </tr>
+            <tr>
                 <td>
+
+                    {%if team.lock%}
+                    <td><b>Team has been locked!</b></td>
+                    {%else%}
                     <input type="hidden" name="lockTarget" value={{team.teamID}}>
                     <input type="submit" name="submit" value="lock">
+                    {%endif%}
                 </td>
-                <td>{{message}}</td>
 
             </tr>
             {%endfor%}

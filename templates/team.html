@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>TeamWork Collection</title>
+    </head>
+    <body>
+        <h1><b>{{teamName}} TeamWork Collection</b></h1>
+        <form method="post">
+
+        <div>Assignment name: {{assignment.assignmentName}}</div>
+        <div>Assignment author: {{assignment.author}}</div>
+        <div>Assignment deadline: {{assignment.deadLine}}</div>
+        <hr>
+        <div>Your  has upload these works:</div>
+        <table>
+            <tr>
+                <th>UploadID</th>
+                <th>Uploder</th>
+                <th>Author</th>
+                <th>Title</th>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Vote</th>
+                <th>Description</th>
+            </tr>
+            {% for upload in uploads%}
+            <tr>
+
+                <td>{{upload.uploadID}}</td>
+                <td>{{upload.author}}</td>
+                <td>{{upload.title}}</td>
+                <td>{{upload.version}}</td>
+                <td>{{upload.date}}</td>
+                <td>{{upload.votes}}</td>
+                <td>{{upload.description}}</td>
+
+                <td>
+                    <input type="hidden" name="downloadTarget" value={{upload.uploadID}}>
+                    <input type="submit" name="submit" value="Download">
+                </td>
+
+            </tr>
+            {% endfor%}
+        </table>
+
+        </form>
+    </body>
+</html>

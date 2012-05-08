@@ -5,6 +5,8 @@ import os
 import webapp2
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+
+
 from dataTable import Team
 from dataTable import Assignment
 from dataTable import ifHasTeam
@@ -79,6 +81,9 @@ class studentHandler(webapp2.RequestHandler):
         if submit == 'upload':
             assignmentTarget = self.request.get('assignmentTarget')
             self.redirect('/upload?assignmentName='+assignmentTarget+'&username='+username)
+        if submit == 'download':
+            assignmentTarget = self.request.get('assignmentTarget')
+            self.redirect('/team?assignmentName='+assignmentTarget+'&username='+username)
         if submit == 'voteUp':
             vote = self.request.get('voteUp')
             voteWork(vote)

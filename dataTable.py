@@ -3,6 +3,7 @@ __author__ = 'Steven_yang'
 import random
 
 from google.appengine.ext import db
+from google.appengine.ext.blobstore import blobstore
 from datetime import datetime
 
 
@@ -64,6 +65,9 @@ class UplaodWork(db.Model):
     version = db.StringProperty(required=True)
     votes = db.IntegerProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
+    URL = db.LinkProperty(required=False)
+    sourceCode = blobstore.BlobReferenceProperty(required=False)
+    document = blobstore.BlobReferenceProperty(required=False)
     description = db.TextProperty(required=True)
 
 
@@ -352,10 +356,11 @@ def createUploadWork(paraDic):
         teams = team,
         assignmentName = assignment.assignmentName,
         author = user.name,
-        uploadID = user.teamID+random.randrange(1001),
+        uploadID = user.teamID+random.randrange(10001),
         title = paraDic['title'],
         version = paraDic['version'],
         description = paraDic['description'],
+        sourceCode = paraDic['sourceCode'],
         votes = 0
     )
     new_uploadWork.put()
@@ -370,5 +375,11 @@ def voteWork(vote):
         work.votes -= 1
     work.put()
 
+def teamAssignmentsCollection(username,assignmentName):
+    user = Users.all().filter('name = ',username).get()
+    team = Team.all().filter('teamID = ',user.teamID).get()
+    assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+    uploads = team.works.filter('assignmentName = ',assignmentName).fetch(20)
+    return (uploads,assignment)
 
 
