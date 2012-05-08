@@ -382,4 +382,11 @@ def teamAssignmentsCollection(username,assignmentName):
     uploads = team.works.filter('assignmentName = ',assignmentName).fetch(20)
     return (uploads,assignment)
 
+def queryStudentWorks(assignmentName):
+    assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+    teams = Team.all().fetch(20)
+    #works = assignment.works.order('-date').fetch(100)
+
+    return (teams,assignment)
+
 

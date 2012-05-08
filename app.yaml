@@ -17,6 +17,9 @@ handlers:
 - url: /teacher
   script: teacher.app
 
+- url: /teacher/review
+  script: review.app
+
 - url: /releaseassignment
   script: teacher.app
 

@@ -69,10 +69,15 @@ class teacherHanlder(webapp2.RequestHandler):
             deadLine = Assignment.all().filter('assignmentName = ',assignmentName).get().deadLine
             if now < deadLine:
                 self.redirect('/editassignment?assignmentName='+assignmentName)
+        if submit == 'reviewAssignment':
+            assignmentName = self.request.get('reviewTarget')
+            username = self.request.get('username')
+            self.redirect('/teacher/review?assignmentName='+assignmentName+'&username='+username)
         if submit == 'lock':
             lockTarget = self.request.get('lockTarget')
             lockTeam(lockTarget)
             self.render_page(message = 'team locked!')
+
 
 
 class releaseAssignmentHandler(webapp2.RequestHandler):

@@ -96,14 +96,26 @@
 
             {% for tag in assignment.tags%}
                 <div><a href="/tagcollection?tagName={{tag.tags.tagName}}&username={{username}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
-                {% endfor%}
+            {% endfor%}
             </div>
+            <form method="post" name="myForm">
             <input type="hidden" name="editTarget" value={{assignment.assignmentName}}>
             <input type="submit" name="submit" value="editAssignment">
+            <input type="hidden" name="reviewTarget" value="{{assignment.assignmentName}}">
+            <input type="submit" name="submit" value="reviewAssignment">
+            </form>
+            <!--<input type="button" name="submit" value="reviewAssignment" onclick=MySubmit()>-->
             <hr>
         {%endfor%}
     {% endif%}
 
     </form>
+    <script type="text/javascript">
+        function MySubmit()
+        {
+
+            alert("The value of this submit button is " + document.forms[0].reviewTarget.value);
+        }
+    </script>
     </body>
 </html>

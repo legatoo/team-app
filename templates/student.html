@@ -130,9 +130,11 @@
         {%ifequal assignment.pubOrTeam "team"%}
             <div>---------------------------------------------------</div>
             <div>Upload or Download your teamWork</div>
+            <form method="post" name="myForm">
             <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
             <input type="submit" name="submit" value="upload">
             <input type="submit" name="submit" value="download">
+            </form>
         {%endifequal%}
 
     <hr>
