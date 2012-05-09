@@ -72,6 +72,7 @@ class UplaodWork(db.Model):
     users = db.ReferenceProperty(Users,collection_name="works",required=True)
     assignments = db.ReferenceProperty(Assignment,collection_name="works",required=True)
     teams = db.ReferenceProperty(Team,collection_name="works",required=True)
+
     uploadID = db.IntegerProperty(required=True)
     assignmentName = db.StringProperty(required=True)
     author = db.StringProperty(required=True)
@@ -99,6 +100,12 @@ class Comments(db.Model):
     date = db.DateTimeProperty(auto_now_add=True)
     uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
 
+class CrossValue(db.Model):
+    team = db.ReferenceProperty(Team,collection_name='crossValues',required=True)
+    assignmentName = db.StringProperty(required=True)
+    teamID = db.IntegerProperty(required=True)
+    score = db.StringProperty(required=True)
+    status = db.BooleanProperty(required=True)
 
 def createDefaultUsers():
     """
@@ -365,7 +372,8 @@ def createComment(paraDic):
         users = author,
         author = author.name,
         content = paraDic['content'],
-        title = paraDic['title']
+        title = paraDic['title'],
+        uploads = paraDic['uploads']
     )
     new_comment.put()
 
@@ -434,7 +442,39 @@ def queryStudentWorks(assignmentName):
     assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
     teams = Team.all().fetch(20)
     #works = assignment.works.order('-date').fetch(100)
-
     return (teams,assignment)
 
+def createCrossValues(teamID,assignmentName):
+    query = db.GqlQuery("SELECT * FROM CrossValue WHERE teamID = :1 AND assignmentName = :2"
+        ,teamID,assignmentName).get()
+    team = Team.all().filter('teamID = ',teamID).get()
+    works = team.works.filter('assignmentName = ',assignmentName).fetch(50)
+    values = {}
+    for work in works:
+        if work.author in values.keys():
+            values[work.author] += work.votes
+        else:
+            values[work.author] = work.votes
+    result = '|'.join( list( item+':'+str(values[item])  for item in values.keys()) )
 
+    if query:
+        query.score = result
+        query.put()
+        return (query,query.status)
+    else:
+
+        new_crossValue = CrossValue(
+            team = team,
+            assignmentName = assignmentName,
+            teamID = team.teamID,
+            score = result,
+            status = False
+        )
+        new_crossValue.put()
+        return (new_crossValue,new_crossValue.status)
+
+def confirmCrossValue(teamID,assignmentName):
+    query = db.GqlQuery("SELECT * FROM CrossValue WHERE teamID = :1 AND assignmentName = :2"
+        ,teamID,assignmentName).get()
+    query.status = True
+    query.put()

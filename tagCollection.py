@@ -45,7 +45,8 @@ class assignmentWallHandler(webapp2.RequestHandler):
             'username':username,
             'assignmentName':assignmentName,
             'content':content,
-            'title':title
+            'title':title,
+            'uploads':None
         }
         createComment(paraDic)
         self.render_page()

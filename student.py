@@ -6,7 +6,7 @@ import webapp2
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
-
+from dataTable import Users
 from dataTable import Team
 from dataTable import Assignment
 from dataTable import ifHasTeam
@@ -23,6 +23,8 @@ class studentHandler(webapp2.RequestHandler):
         templateValues = {}
         form  = os.path.join(os.path.dirname(__file__),'templates/student.html')
         username = self.request.get('username')
+        user = Users.all().filter('name = ',username).get()
+
         if not ifHasTeam(username):
             templateValues['hasTeam'] = 'no'
             teams = query_teams()
@@ -45,6 +47,8 @@ class studentHandler(webapp2.RequestHandler):
         templateValues['voteMessage'] = voteMessage
         templateValues['username'] = username
         templateValues['message2'] = message2
+
+        templateValues['user'] = user
 
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)

@@ -44,4 +44,10 @@ handlers:
 - url: /team
   script: team.app
 
+- url: /teamworkcomments
+  script: teamworkComments.app
+
+- url: /crossvalue
+  script: team.app
+
 

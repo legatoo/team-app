@@ -9,7 +9,7 @@
 
     <form method="post">
         <h1 class="label">Student Page</h1>
-        <h2 class="label">Welcome Student! {{username}}</h2>
+        <h2 class="label">Welcome Student! {{user.name}}</h2>
 
         {%ifequal hasTeam "no" %}
         <div><b>You have not join a team.</b></div>
@@ -110,6 +110,10 @@
     {% endfor%}
     <br>
     {%ifequal assignment.pubOrTeam "team"%}
+    {% if user.leader %}
+        <div>You are the leader, please confirm the team-cross-value information</div>
+        <a href="/crossvalue?teamID={{user.teamID}}&assignmentName={{assignment.assignmentName}}">Go to check</a>
+    {% endif%}
     <div>You have uploaded these works:</div>
     {%endifequal%}
     <br>
@@ -129,6 +133,7 @@
         <input type="hidden" name="voteDown" value="{{username}}+down+{{work.uploadID}}">
         <input type="submit" name="submit" value="voteDown">
         <div>{{voteMessage}}</div>
+        <a href="/teamworkcomments?username={{username}}&uploadID={{work.uploadID}}">comment</a>
         </form>
         {% endifequal%}
         {%endfor%}
@@ -139,6 +144,7 @@
             <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
             <input type="submit" name="submit" value="upload">
             <input type="submit" name="submit" value="download">
+
             </form>
         {%endifequal%}
 

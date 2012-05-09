@@ -24,7 +24,7 @@ def tagDigest(tags):
     return tagList
 
 class teacherHanlder(webapp2.RequestHandler):
-    def render_page(self,message = ''):
+    def render_page(self,editMessage = ''):
         templateValues = {}
         username = self.request.get('username')
         templateValues['username'] = username
@@ -39,7 +39,7 @@ class teacherHanlder(webapp2.RequestHandler):
             templateValues['assignments'] = assignments
         if teams:
             templateValues['teams'] = teams
-            templateValues['message'] = message
+            templateValues['editMessage'] = editMessage
         form = os.path.join(os.path.dirname(__file__),'templates/teacher.html')
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
@@ -69,6 +69,8 @@ class teacherHanlder(webapp2.RequestHandler):
             deadLine = Assignment.all().filter('assignmentName = ',assignmentName).get().deadLine
             if now < deadLine:
                 self.redirect('/editassignment?assignmentName='+assignmentName)
+            else:
+                self.render_page(editMessage='You can not edit a expired assignment')
         if submit == 'reviewAssignment':
             assignmentName = self.request.get('reviewTarget')
             username = self.request.get('username')
