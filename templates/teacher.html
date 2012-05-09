@@ -86,7 +86,7 @@
         </table>
         {% endif%}
 
-    <a href="/login">Sign out</a>
+
     <hr>
     {%if assignments%}
         {%for assignment in assignments%}
@@ -114,12 +114,7 @@
     {% endif%}
 
     </form>
-    <script type="text/javascript">
-        function MySubmit()
-        {
+    <a href="/login">Sign out</a>
 
-            alert("The value of this submit button is " + document.forms[0].reviewTarget.value);
-        }
-    </script>
     </body>
 </html>

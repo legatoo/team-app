@@ -28,7 +28,9 @@
             <th>Date</th>
             <th>Vote</th>
             <th>Status</th>
+            <th>URL</th>
             <th>Description</th>
+            <th>Download sourceCode</th>
         </tr>
         {% for team in teams%}
         {% for upload in team.works%}
@@ -43,6 +45,7 @@
             <td>{{upload.date}}</td>
             <td>{{upload.votes}}</td>
             <td>{{upload.status}}</td>
+            <td><a href={{upload.URL}}>URL</a></td>
             <td>{{upload.description}}</td>
 
             <td>
@@ -62,5 +65,6 @@
     </table>
 
 </form>
+<a href="/login">Sign out</a>
 </body>
 </html>

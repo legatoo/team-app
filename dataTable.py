@@ -82,7 +82,8 @@ class UplaodWork(db.Model):
     voterUpList = db.StringListProperty(required=True)
     voterDownList = db.StringListProperty(required=True)
     status = db.StringProperty(required=True)
-    URL = db.LinkProperty(required=False)
+    score = db.IntegerProperty(required=True)
+    URL = db.StringProperty(required=False)
     sourceCode = blobstore.BlobReferenceProperty(required=False)
     document = blobstore.BlobReferenceProperty(required=False)
     description = db.TextProperty(required=True)
@@ -373,7 +374,7 @@ def createUploadWork(paraDic):
     assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
     team = Team.all().filter('teamID = ',user.teamID).get()
 
-    for work in assignment.works:
+    for work in team.works:
         work.status = 'inactive'
         work.put()
     new_uploadWork = UplaodWork(
@@ -390,6 +391,8 @@ def createUploadWork(paraDic):
         version = paraDic['version'],
         description = paraDic['description'],
         sourceCode = paraDic['sourceCode'],
+        URL = paraDic['URL'],
+        score = 0,
         votes = 0
     )
     new_uploadWork.put()

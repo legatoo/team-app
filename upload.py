@@ -34,6 +34,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         title = self.request.get('uploadTitle')
         version = self.request.get('uploadVersion')
         description = self.request.get('uploadDescription')
+        URL = self.request.get('URL')
         #sourceCode = self.get_uploads('file')
         #bolb_info = sourceCode[0]
         paraDic = {
@@ -42,7 +43,8 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             'title':title,
             'version':version,
             'description':description,
-            'sourceCode':blob_info.key()
+            'sourceCode':blob_info.key(),
+            'URL':URL
         }
         createUploadWork(paraDic)
         self.redirect('/student?username='+username)

@@ -37,9 +37,11 @@
                     {%if team.lock%}
                     <td>Team has been locked!</td>
                     {%else%}
+                    <form method="post" name="joinForm">
                     <input type="hidden" name="joinTarget" value={{team.teamID}}>
                     <input type="submit" name="submit" value="join">
                     <td>{{message1}}</td>
+                    </form>
                     {%endif%}
                 </td>
 
@@ -88,7 +90,7 @@
 
     <br>
     <br>
-    <a href="/login">Sign out</a>
+
     <hr>
 
     <hr>
@@ -145,6 +147,6 @@
     {% endif%}
 
     </form>
-
+    <a href="/login">Sign out</a>
     </body>
 </html>
