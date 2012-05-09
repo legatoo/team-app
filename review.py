@@ -2,11 +2,14 @@ __author__ = 'Steven_yang'
 
 import os
 import webapp2
+from google.appengine.ext.blobstore import blobstore
+from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 
 from dataTable import queryStudentWorks
+from dataTable import UplaodWork
 
-class reviewHandler(webapp2.RequestHandler):
+class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
         self.render_page()
     def render_page(self):
@@ -20,6 +23,11 @@ class reviewHandler(webapp2.RequestHandler):
         templateValues['username'] = username
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
+
+    def post(self):
+        uploadID = int(self.request.get('downloadTarget'))
+        sourceCode_key = UplaodWork.all().filter('uploadID = ',uploadID).get().sourceCode.key()
+        self.send_blob(blobstore.BlobInfo.get(sourceCode_key), save_as=True)
 
 
 app = webapp2.WSGIApplication([('/teacher/review',reviewHandler)],debug=True)

@@ -1,6 +1,8 @@
 __author__ = 'Steven_yang'
 
 import random
+import string
+import hashlib
 
 from google.appengine.ext import db
 from google.appengine.ext.blobstore import blobstore
@@ -15,6 +17,18 @@ defaultUsers = [
     ('lianDUAN','duan123456','duanlian@what.com','student'),
     ('xinHAO','hao123456','haoxin@example.com','student')
 ]
+def make_salt():
+    return ''.join(random.choice(string.letters) for i in xrange(8))
+
+def make_pw_hash(username,password,salt = None):
+    if not salt:
+        salt = make_salt()
+    hashPassword = hashlib.sha256(username+password+salt).hexdigest()
+    return '%s|%s' %(hashPassword,salt)
+
+def user_valid(username,password,hashPassword):
+    salt = hashPassword.split('|')[1]
+    return hashPassword == make_pw_hash(username,password,salt)
 
 class Team(db.Model):
     teamName = db.StringProperty(required=True)
@@ -26,7 +40,7 @@ class Team(db.Model):
 class Users(db.Model):
     #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
     name = db.StringProperty(required=True)
-    password = db.StringProperty(required=True)
+    hashPassword = db.StringProperty(required=True)
     email = db.StringProperty()
     role = db.StringProperty(required=True, choices=set(['teacher','student','TA']))
     teamID = db.IntegerProperty(required=False)
@@ -65,6 +79,9 @@ class UplaodWork(db.Model):
     version = db.StringProperty(required=True)
     votes = db.IntegerProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
+    voterUpList = db.StringListProperty(required=True)
+    voterDownList = db.StringListProperty(required=True)
+    status = db.StringProperty(required=True)
     URL = db.LinkProperty(required=False)
     sourceCode = blobstore.BlobReferenceProperty(required=False)
     document = blobstore.BlobReferenceProperty(required=False)
@@ -89,24 +106,30 @@ def createDefaultUsers():
     user_count = Users.all().count(1)
     if user_count == 0:
         for user in defaultUsers:
-            new_user = Users( name = user[0], password = user[1],
+            hashPassword = make_pw_hash(user[0],user[1])
+            new_user = Users( name = user[0], hashPassword = hashPassword,
                 email = user[2], role = user[3],  hasTeam = False, leader = False)
             new_user.put()
 
 def addStudent(paraTuple):
-    new_user = Users(name = paraTuple[0], password = paraTuple[1],
+    hashPassword = make_pw_hash(paraTuple[0],paraTuple[1])
+    new_user = Users(name = paraTuple[0], password = hashPassword,
         email = paraTuple[2], role = paraTuple[3], leader = False, hasTeam = False)
     new_user.put()
 
 def user_validation(username,password):
-    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1 AND password = :2"
-        ,username,password)
+    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
     result = user.get()
+
     template_values = {}
-    if result:
-        template_values['haveUser'] = 'yes'
-        template_values['user'] = result
-        #template_values['userKey'] = user
+    if result :
+        hashPassword = result.hashPassword
+        if user_valid(username=username,password=password,hashPassword=hashPassword):
+            template_values['haveUser'] = 'yes'
+            template_values['user'] = result
+            #template_values['userKey'] = user
+        else:
+            template_values['haveUser'] = 'no'
     else:
         template_values['haveUser'] = 'no'
     return template_values
@@ -348,8 +371,11 @@ def createComment(paraDic):
 def createUploadWork(paraDic):
     user = Users.all().filter('name = ',paraDic['username']).get()
     assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
-
     team = Team.all().filter('teamID = ',user.teamID).get()
+
+    for work in assignment.works:
+        work.status = 'inactive'
+        work.put()
     new_uploadWork = UplaodWork(
         users = user,
         assignments = assignment,
@@ -357,6 +383,9 @@ def createUploadWork(paraDic):
         assignmentName = assignment.assignmentName,
         author = user.name,
         uploadID = user.teamID+random.randrange(10001),
+        voterUpList = [],
+        voterDownList = [],
+        status = 'active',
         title = paraDic['title'],
         version = paraDic['version'],
         description = paraDic['description'],
@@ -368,12 +397,28 @@ def createUploadWork(paraDic):
 
 def voteWork(vote):
     votes = vote.split('+')
-    work = UplaodWork.all().filter('uploadID = ',int(votes[1])).get()
-    if votes[0] == 'up':
-        work.votes += 1
-    if votes[0] == 'down':
-        work.votes -= 1
+    work = UplaodWork.all().filter('uploadID = ',int(votes[2])).get()
+    username = votes[0]
+
+    if votes[1] == 'up':
+        if username in work.voterUpList:
+            return False
+        else:
+            work.voterUpList.append(username)
+            voterDownList = filter(lambda a: a!=username,work.voterDownList)
+            work.voterDownList = voterDownList
+            work.votes += 1
+    if votes[1] == 'down':
+        if username in work.voterDownList:
+            return False
+        else:
+            work.voterDownList.append(username)
+            voterUpList = filter(lambda a: a!=username,work.voterUpList)
+            work.voterUpList = voterUpList
+            work.votes -= 1
     work.put()
+    return True
+
 
 def teamAssignmentsCollection(username,assignmentName):
     user = Users.all().filter('name = ',username).get()

@@ -27,6 +27,7 @@
             <th>Version</th>
             <th>Date</th>
             <th>Vote</th>
+            <th>Status</th>
             <th>Description</th>
         </tr>
         {% for team in teams%}
@@ -41,11 +42,16 @@
             <td>{{upload.version}}</td>
             <td>{{upload.date}}</td>
             <td>{{upload.votes}}</td>
+            <td>{{upload.status}}</td>
             <td>{{upload.description}}</td>
 
             <td>
+                {% ifequal upload.status "active"%}
+                <form method="post" name="downloadForm">
                 <input type="hidden" name="downloadTarget" value={{upload.uploadID}}>
                 <input type="submit" name="submit" value="Download">
+                </form>
+                {% endifequal%}
             </td>
 
         </tr>

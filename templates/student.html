@@ -121,10 +121,13 @@
         <div>Description: {{work.description}}</div>
         <div>Upload time: {{work.date}}</div>
         <div>Vote: {{work.votes}}</div>
-        <input type="hidden" name="voteUp" value="up+{{work.uploadID}}">
+        <form method="post" name="voteForm">
+        <input type="hidden" name="voteUp" value="{{username}}+up+{{work.uploadID}}">
         <input type="submit" name="submit" value="voteUp">
-        <input type="hidden" name="voteDown" value="down+{{work.uploadID}}">
+        <input type="hidden" name="voteDown" value="{{username}}+down+{{work.uploadID}}">
         <input type="submit" name="submit" value="voteDown">
+        <div>{{voteMessage}}</div>
+        </form>
         {% endifequal%}
         {%endfor%}
         {%ifequal assignment.pubOrTeam "team"%}

@@ -19,7 +19,7 @@ from dataTable import voteWork
 
 class studentHandler(webapp2.RequestHandler):
 
-    def render_page(self,message1='',message2='',teamID=''):
+    def render_page(self,message1='',message2='',teamID='',voteMessage = ''):
         templateValues = {}
         form  = os.path.join(os.path.dirname(__file__),'templates/student.html')
         username = self.request.get('username')
@@ -42,7 +42,7 @@ class studentHandler(webapp2.RequestHandler):
             templateValues['uploadWorks'] = uploadWorks
 
         templateValues['assignments'] = assignments
-
+        templateValues['voteMessage'] = voteMessage
         templateValues['username'] = username
         templateValues['message2'] = message2
 
@@ -86,12 +86,16 @@ class studentHandler(webapp2.RequestHandler):
             self.redirect('/team?assignmentName='+assignmentTarget+'&username='+username)
         if submit == 'voteUp':
             vote = self.request.get('voteUp')
-            voteWork(vote)
-            self.render_page()
+            if voteWork(vote):
+                self.render_page(voteMessage='Thanks for voting!')
+            else :
+                self.render_page(voteMessage='You can vote this work only once!')
         if submit == 'voteDown':
             vote = self.request.get('voteDown')
-            voteWork(vote)
-            self.render_page()
+            if voteWork(vote):
+                self.render_page(voteMessage='Thanks for voting!')
+            else :
+                self.render_page(voteMessage='You can vote this work only once!')
 
 
 
