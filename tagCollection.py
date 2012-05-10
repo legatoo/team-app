@@ -7,6 +7,7 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import  template
 
 from dataTable import createComment
+from dataTable import commentAcomment
 
 
 class tagCollectionHandler(webapp2.RequestHandler):
@@ -37,18 +38,25 @@ class assignmentWallHandler(webapp2.RequestHandler):
         self.response.out.write(renderPage)
 
     def post(self):
+        submit = self.request.get('submit')
         username = self.request.get('username')
         assignmentName = self.request.get('assignmentName')
-        content = self.request.get('content')
-        title = self.request.get('title')
-        paraDic = {
-            'username':username,
-            'assignmentName':assignmentName,
-            'content':content,
-            'title':title,
-            'uploads':None
-        }
-        createComment(paraDic)
+        if submit == 'comment':
+            content = self.request.get('content')
+            title = self.request.get('title')
+            paraDic = {
+                'username':username,
+                'assignmentName':assignmentName,
+                'content':content,
+                'title':title,
+                #'uploads':None
+            }
+            createComment(paraDic)
+        if submit == 'commentThis':
+            commentID = int(self.request.get('commentID'))
+            content = self.request.get('commentContent')
+            commentAcomment(username,commentID,content)
+
         self.render_page()
 
 app = webapp2.WSGIApplication([('/tagcollection',tagCollectionHandler),

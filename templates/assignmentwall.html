@@ -23,7 +23,7 @@
             <br>
             <textarea rows="5" cols="50" name="content"></textarea>
             <br>
-            <input type="submit" value="comment">
+            <input type="submit" name="submit" value="comment">
             <hr>
 
             {%for comment in assignment.comments%}
@@ -32,6 +32,20 @@
             <div>Time: {{comment.date}}</div>
             <br>
             <pre>{{comment.content}}</pre>
+            <hr>
+            <div>You can comment this comment.</div>
+            <form method="post" name="commentAcommment">
+                <textarea rows="5" cols="50" name="commentContent"></textarea>
+                <input type="hidden" name="commentID" value={{comment.commentID}}>
+
+                <input type="submit" name="submit" value="commentThis">
+            </form>
+            {% if comment.comments%}
+            {%for item in comment.comments%}
+            <div><b>{{item}}</b></div>
+            <div>..................................</div>
+            {% endfor%}
+            {% endif%}
             <hr>
             {%endfor%}
 

@@ -42,6 +42,7 @@ class teamHandler(blobstore_handlers.BlobstoreDownloadHandler):
         sourceCode_key = UplaodWork.all().filter('uploadID = ',uploadID).get().sourceCode.key()
         self.send_blob(blobstore.BlobInfo.get(sourceCode_key), save_as=True)
 
+
 class crossvalueHandler(webapp2.RequestHandler):
     def get(self):
         self.render_page()
@@ -62,7 +63,7 @@ class crossvalueHandler(webapp2.RequestHandler):
             self.response.out.write(renderPage)
         else:
             templateValues['error']='No record, because no one uploaded.'
-            templateValues['leader'] = None
+            templateValues['leader'] = leader
             renderPage = template.render(form,templateValues)
             self.response.out.write(renderPage)
 
