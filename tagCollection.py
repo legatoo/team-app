@@ -6,7 +6,7 @@ import webapp2
 from google.appengine.ext import db
 from google.appengine.ext.webapp import  template
 
-from dataTable import createComment
+from dataTable import createAssignmentComment
 from dataTable import commentAcomment
 
 
@@ -49,9 +49,9 @@ class assignmentWallHandler(webapp2.RequestHandler):
                 'assignmentName':assignmentName,
                 'content':content,
                 'title':title,
-                #'uploads':None
+
             }
-            createComment(paraDic)
+            createAssignmentComment(paraDic)
         if submit == 'commentThis':
             commentID = int(self.request.get('commentID'))
             content = self.request.get('commentContent')

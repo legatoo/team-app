@@ -90,18 +90,18 @@ class UplaodWork(db.Model):
     description = db.TextProperty(required=True)
 
 
-
 class Comments(db.Model):
     users = db.ReferenceProperty(Users,collection_name="comments",required=True)
     author = db.StringProperty(required=True)
-    title = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     commentID = db.IntegerProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
-    comments = db.StringListProperty(required=True)
+    title = db.StringProperty(required=False)
+    #comments = db.StringListProperty(required=True)
+    #three kind of comment
     uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
     assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=False)
-    #comments = db.ReferenceProperty(Comments,collection_name="comments",required=False)
+    selfRefference = db.SelfReferenceProperty(collection_name="comments",required=False)
 
 
 class CrossValue(db.Model):
@@ -368,41 +368,50 @@ def lockTeam(teamID):
     team.lock = True
     team.put()
 
-def createComment(paraDic):
-    author = Users.all().filter('name = ',paraDic['username']).get()
+def createAssignmentComment(paraDic):
+    user = Users.all().filter('name = ',paraDic['username']).get()
     assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
-    if assignment:
-        new_comment = Comments(
-            assignments = assignment,
-            users = author,
-            author = author.name,
-            commentID = random.randrange(100001),
-            content = paraDic['content'],
-            title = paraDic['title'],
-            #uploads = paraDic['uploads'],
-            comments = []
-        )
-    else:
-        new_comment = Comments(
-            #assignments = assignment,
-            users = author,
-            author = author.name,
-            commentID = random.randrange(100001),
-            content = paraDic['content'],
-            title = paraDic['title'],
-            uploads = paraDic['uploads'],
-            comments = []
-        )
+    new_comment = Comments(
+        users = user,
+        author = user.name,
+        commentID = random.randrange(100001),
+        content = paraDic['content'],
+        title = paraDic['title'],
+        assignments = assignment,
+
+    )
+
+    new_comment.put()
+
+
+def createUploadComment(paraDic):
+    user = Users.all().filter('name = ',paraDic['username']).get()
+    new_comment = Comments(
+        users = user,
+        author = user.name,
+        commentID = random.randrange(100001),
+        content = paraDic['content'],
+        title = paraDic['title'],
+        uploads = paraDic['uploads'],
+
+    )
     new_comment.put()
 
 def commentAcomment(username,commentID,content):
     comment = Comments.all().filter('commentID = ',commentID).get()
     #assignmentName = comment.assignmentName
     #assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
-    #user = Users.all().filter('name = ',username).get()
-    commentContent = username+' said at '+ str(datetime.now().ctime())+': '+ content
-    comment.comments.append(commentContent)
-    comment.put()
+    user = Users.all().filter('name = ',username).get()
+    new_comment = Comments(
+        users = user,
+        author = user.name,
+        #title = '',
+        commentID = random.randrange(100001),
+        content = content,
+        selfRefference = comment
+    )
+
+    new_comment.put()
 
 
 def createUploadWork(paraDic):

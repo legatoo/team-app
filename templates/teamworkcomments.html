@@ -53,8 +53,10 @@
         </form>
             {% if comment.comments%}
             {%for item in comment.comments%}
-            <div><b>{{item}}</b></div>
-            <div>..................................</div>
+            <div><b>{{item.author}}</b></div>
+            <div>{{item.date}}</div>
+            <pre>{{item.content}}</pre>
+            <div>................................................</div>
             {% endfor%}
             {% endif%}
         <hr>

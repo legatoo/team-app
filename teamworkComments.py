@@ -10,7 +10,7 @@ from google.appengine.ext.webapp import template
 
 from dataTable import UplaodWork
 from dataTable import Assignment
-from dataTable import createComment
+from dataTable import createUploadComment
 from dataTable import commentAcomment
 
 
@@ -52,7 +52,7 @@ class teamworkCommentHandler(blobstore_handlers.BlobstoreDownloadHandler):
                 'title':title,
                 'uploads':uploadWork
             }
-            createComment(paraDic)
+            createUploadComment(paraDic)
             self.render_page()
         if submit == 'commentThis':
             commentID = int(self.request.get('commentID'))
