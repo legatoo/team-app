@@ -36,13 +36,10 @@ class studentHandler(webapp2.RequestHandler):
 
         else:
             templateValues['hasTeam'] = 'yes'
-            (members,team,user) = returnStuANDTeam(username)
+            (team,user) = returnStuANDTeam(username)
             templateValues['team'] = team
-            templateValues['members'] = members
             assignments = Assignment.all()
-            #only teammates can see and vote a team work
-            uploadWorks = Team.all().filter('teamID = ',user.teamID).get().works
-            templateValues['uploadWorks'] = uploadWorks
+
 
         myScores = Score.all().filter('username = ',username)
         templateValues['assignments'] = assignments

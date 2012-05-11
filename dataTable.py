@@ -40,7 +40,6 @@ class Team(db.Model):
     lock = db.BooleanProperty(required=True)
 
 class Users(db.Model):
-    #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
     name = db.StringProperty(required=True)
     hashPassword = db.StringProperty(required=True)
     studentID = db.IntegerProperty(required=True)
@@ -50,6 +49,8 @@ class Users(db.Model):
     teamID = db.IntegerProperty(required=True)
     hasTeam = db.BooleanProperty()
     leader = db.BooleanProperty()
+    reference = db.ReferenceProperty(Team,collection_name="teamMembers",required=False)
+
 
 
 class Assignment(db.Model):
@@ -228,10 +229,7 @@ def returnStuANDTeam(username):
     user = Users.all().filter('name = ',username).get()
     team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username)
     fetchTeam = team.get()
-    teamID = fetchTeam.teamID
-    members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
-    fetchMembers = members.fetch(10)
-    return (fetchMembers,fetchTeam,user)
+    return (fetchTeam,user)
 
 
 def delete_student(studentName):
@@ -294,6 +292,7 @@ def createTeam(username, teamName,teamRole):
             user.leader = True
             user.teamID = teamID
             user.teamRole = teamRole
+            user.reference = new_Team
             user.put()
             return 'success'
         else:
@@ -315,6 +314,7 @@ def addMember(teamID,username,teamRole):
         userResult.teamID = int(teamID)
         userResult.hasTeam = True
         userResult.teamRole = teamRole
+        userResult.reference = teamResult
         teamMember =teamResult.teamMember
         teamMember.append(username)
         teamResult.teamMember = teamMember
@@ -442,32 +442,40 @@ def createUploadWork(paraDic):
     user = Users.all().filter('name = ',paraDic['username']).get()
     assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
     team = Team.all().filter('teamID = ',user.teamID).get()
-    score = createScore(user,assignment,team)
-    for work in team.works:
-        work.status = 'inactive'
-        work.put()
-    new_uploadWork = UplaodWork(
-        users = user,
-        assignments = assignment,
-        teams = team,
-        assignmentName = assignment.assignmentName,
-        author = user.name,
-        uploadID = user.teamID+random.randrange(10001),
-        voterUpList = [],
-        voterDownList = [],
-        status = 'active',
-        title = paraDic['title'],
-        version = paraDic['version'],
-        description = paraDic['description'],
-        sourceCode = paraDic['sourceCode'],
-        URL = paraDic['URL'],
-        filename = paraDic['filename'],
-        #score = 0,
-        votes = 0
-    )
-    new_uploadWork.put()
-    score.uploadStuff.append(paraDic['filename'])
-    score.put()
+    now = datetime.now()
+    deadLine = assignment.deadLine
+    if now < deadLine:
+        sameRoleUsers = Users.all().filter('teamID = ',user.teamID).filter('teamRole = ',user.teamRole)
+        for role in sameRoleUsers:
+            for work in role.works:
+                work.status = 'inactive'
+                work.put()
+        new_uploadWork = UplaodWork(
+            users = user,
+            assignments = assignment,
+            teams = team,
+            assignmentName = assignment.assignmentName,
+            author = user.name,
+            uploadID = user.teamID+random.randrange(10001),
+            voterUpList = [],
+            voterDownList = [],
+            status = 'active',
+            title = paraDic['title'],
+            version = paraDic['version'],
+            description = paraDic['description'],
+            sourceCode = paraDic['sourceCode'],
+            URL = paraDic['URL'],
+            filename = paraDic['filename'],
+            #score = 0,
+            votes = 0
+        )
+        new_uploadWork.put()
+        score = createScore(user,assignment,team)
+        score.uploadStuff.append(paraDic['filename'])
+        score.put()
+        return True
+    else:
+        return False
 
 def voteWork(vote):
     votes = vote.split('+')
@@ -514,22 +522,26 @@ def queryStudentWorks(assignmentName):
     return (teams,assignment)
 
 def createScore(user,assignment,team):
-    new_score = Score(
-        scoreID = user.studentID + random.randrange(100001),
-        user = user,
-        assignment = assignment,
-        username = user.name,
-        assignmentName = assignment.assignmentName,
-        team = team,
-        votes = 0,
-        personScore = 0.0,
-        uploadStuff = [],
-        scorePeople = [],
-        comment = [],
-        confirm = False
-    )
-    new_score.put()
-    return new_score
+    query = Score.all().filter('username = ',user.name).filter('assignmentName = ',assignment.assignmentName).get()
+    if query:
+        return query
+    else:
+        new_score = Score(
+            scoreID = user.studentID + random.randrange(100001),
+            user = user,
+            assignment = assignment,
+            username = user.name,
+            assignmentName = assignment.assignmentName,
+            team = team,
+            votes = 0,
+            personScore = 0.0,
+            uploadStuff = [],
+            scorePeople = [],
+            comment = [],
+            confirm = False
+        )
+        new_score.put()
+        return new_score
 
 def scoreMem(scorer,scoreTarget,scoreNumber,comment):
     score = Score.all().filter('scoreID = ',scoreTarget).get()

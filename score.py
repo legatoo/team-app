@@ -16,7 +16,7 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
     def get(self):
         self.render_page()
 
-    def render_page(self,message='',confirmMessage=''):
+    def render_page(self,message='',confirmMessage='',error=''):
         form = os.path.join(os.path.dirname(__file__),'templates/stumutualscore.html')
         templateValues = {}
         username = self.request.get('username')
@@ -33,6 +33,7 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
         templateValues['teamName'] = team.teamName
         templateValues['memberScores'] = memberScores
         templateValues['message'] = message
+        templateValues['error'] = error
 
         templateValues['confirmMessage'] = confirmMessage
         renderPage = template.render(form,templateValues)
@@ -44,14 +45,27 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
         submit = self.request.get('submit')
         username = self.request.get('username')
         if submit == 'submit':
-            score = int(self.request.get('scoreNumber'))
+            score = self.request.get('scoreNumber')
             scoreTarget = int(self.request.get('scoreTarget'))
             comment = self.request.get('comment')
-            result = scoreMem(username,scoreTarget,score,comment)
-            if result == 'scored':
-                self.render_page(message = 'You have scored!')
-            if result == 'success':
-                self.render_page()
+            if score and comment:
+                if score.isdigit():
+                    score = int(score)
+                    if score > 100 or score < 0:
+                        self.render_page(error='Score and comment can not be empty! ' \
+                                           'Score should be number between [0-100].')
+                    else:
+                        result = scoreMem(username,scoreTarget,score,comment)
+                        if result == 'scored':
+                            self.render_page(message = 'You have scored!')
+                        if result == 'success':
+                            self.render_page()
+                else:
+                    self.render_page(error='Score and comment can not be empty! '\
+                                           'Score should be number between [0-100].')
+            else :
+                self.render_page(error='Score and comment can not be empty! ' \
+                                       'Score should be number between [0-100].')
         if submit == 'confirm':
 
             assignmentName = self.request.get('assignmentName')

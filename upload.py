@@ -13,7 +13,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.render_page()
 
-    def render_page(self):
+    def render_page(self,uploadMessage=''):
         username = self.request.get('username')
         assignmentName = self.request.get('assignmentName')
         upload_url = blobstore.create_upload_url('/upload?assignmentName='+assignmentName+'&username='+username)
@@ -22,6 +22,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         username = self.request.get('username')
         templateValues['username'] = username
         templateValues['upload_url'] = upload_url
+        templateValues['uploadMessage'] = uploadMessage
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
@@ -47,8 +48,10 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             'URL':URL,
             'filename':blob_info.filename
         }
-        createUploadWork(paraDic)
-        self.redirect('/student?username='+username)
+        if createUploadWork(paraDic):
+            self.redirect('/student?username='+username)
+        else:
+            self.render_page(uploadMessage='Bad luck! This assignment is expired!')
 
 
 

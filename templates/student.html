@@ -83,7 +83,7 @@
                 <th>name</th>
                 <th>email</th>
             </tr>
-            {% for mem in members%}
+            {% for mem in team.teamMembers%}
             <tr>
                 <td>{{mem.name}}</td>
                 <td>{{mem.studentID}}</td>
@@ -126,7 +126,7 @@
     {%endifequal%}
     <br>
 
-        {%for work in uploadWorks%}
+        {%for work in team.works%}
         {% ifequal work.assignmentName assignment.assignmentName %}
 
         <div>author: {{work.author}}</div>
@@ -161,7 +161,7 @@
     {% endif%}
 
     {% if myScores%}
-        <div>Your score</div>
+        <div><b>Your score</b></div>
         <dl>
 
             {% for score in myScores%}

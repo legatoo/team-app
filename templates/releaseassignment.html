@@ -12,7 +12,7 @@
                 <tr>
                     <td>Assignment name:</td>
                     <td><input type="text" name="assignmentName" value={{assignmentName}}></td>
-                    <td>{{assignmentNameError}}</td>
+                    <td><b>{{assignmentNameError}}</b></td>
                 </tr>
 
                 <tr>
@@ -32,10 +32,12 @@
                     <td><input type="text" name="year">year</td>
                     <td><input type="text" name="month">month</td>
                     <td><input type="text" name="day">day</td>
+                    <td><b>{{deadLineError}}</b></td>
                 </tr>
             </table>
             <div>Assignment Requirement</div>
             <textarea name="assignmentContent" rows="16" cols="100">{{assignmentContent|escape}}</textarea>
+            <div><b>{{contentError}}</b></div>
             <br>
             <br>
             <input type="submit" value="Release">

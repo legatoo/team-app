@@ -39,7 +39,7 @@ class teacherHanlder(webapp2.RequestHandler):
             templateValues['assignments'] = assignments
         if teams:
             templateValues['teams'] = teams
-            templateValues['editMessage'] = editMessage
+        templateValues['editMessage'] = editMessage
         form = os.path.join(os.path.dirname(__file__),'templates/teacher.html')
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
@@ -85,15 +85,18 @@ class teacherHanlder(webapp2.RequestHandler):
 class releaseAssignmentHandler(webapp2.RequestHandler):
     def get(self):
         self.render_page()
-    def render_page(self, assignmentName='',tagName='', assignmentContent=''):
+    def render_page(self, assignmentName='',assignmentNameError='',tagName='', assignmentContent='',contentError='',deadLineError=''):
         form = os.path.join(os.path.dirname(__file__),'templates/releaseassignment.html')
         templateValues = {}
         username = self.request.get('username')
         templateValues['username'] = username
         templateValues['tags'] = query_tags()
         templateValues['assignmentName'] = assignmentName
+        templateValues['assignmentNameError'] = assignmentNameError
         templateValues['tagName'] = tagName
         templateValues['assignmentContent'] = assignmentContent
+        templateValues['contentError'] = contentError
+        templateValues['deadLineError'] = deadLineError
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
@@ -103,16 +106,37 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
         """
         username = self.request.get('username')
         assignmentName = self.request.get('assignmentName')
-        tagNames = tagDigest(str(self.request.get('tagNames')))
-        #checkboxTagNames = self.request.getlist('checkboxTagNames')
-        #tagNames += checkboxTagNames
+        tagName = str(self.request.get('tagNames'))
+
         receiver = self.request.get('receiver')
         deadline = datetime( int(self.request.get('year')),
                              int(self.request.get('month')),
                              int(self.request.get('day')))
         assignmentContent = self.request.get('assignmentContent')
+        now = datetime.now()
+        if now > deadline:
+            self.render_page(
+                assignmentName=assignmentName,
+                tagName=tagName,
+                assignmentContent=assignmentContent,
+                deadLineError='DeadLine is invalid!'
+            )
+        elif not assignmentContent:
+            self.render_page(
+                assignmentName=assignmentName,
+                tagName=tagName,
+                contentError='Content can not be empty!'
+            )
 
-        if not ifAssignmentNameOK(assignmentName):
+        elif ifAssignmentNameOK(assignmentName):
+            self.render_page(
+                assignmentName = assignmentName,
+                assignmentNameError='Duplicate assignment name!',
+                assignmentContent=assignmentContent,
+                tagName=tagName
+            )
+        else:
+            tagNames = tagDigest(tagName)
             paraDictionary = {
                 'username':username,
                 'assignmentName':assignmentName,
@@ -121,9 +145,10 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                 'receiver':receiver,
                 'deadline':deadline,
                 'assignmentContent':assignmentContent,
-            }
+                }
             createAssignment(paraDictionary)
-        self.redirect('/teacher?username='+username)
+
+            self.redirect('/teacher?username='+username)
 
 class editAssignmentHandler(webapp2.RequestHandler):
     def get(self):
