@@ -27,6 +27,12 @@
                 </tr>
 
                 <tr>
+                    <td>studentID: </td>
+                    <td><input type="text" name="studentID" value={{studentID}}></td>
+                    {% if error%}<td><div class="error"><b>{{error.studentID}}</b></div> </td>{% endif%}
+                </tr>
+
+                <tr>
                     <td>email: </td>
                     <td><input type="text" name="email" value={{email}}></td>
                     {% if error%}<td><div class="error"><b>{{error.email}}</b></div> </td>{% endif%}

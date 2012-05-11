@@ -8,6 +8,7 @@ from google.appengine.ext.webapp import template
 
 from dataTable import Users
 from dataTable import Team
+from dataTable import Score
 from dataTable import Assignment
 from dataTable import ifHasTeam
 from dataTable import returnStuANDTeam
@@ -43,10 +44,12 @@ class studentHandler(webapp2.RequestHandler):
             uploadWorks = Team.all().filter('teamID = ',user.teamID).get().works
             templateValues['uploadWorks'] = uploadWorks
 
+        myScores = Score.all().filter('username = ',username)
         templateValues['assignments'] = assignments
         templateValues['voteMessage'] = voteMessage
         templateValues['username'] = username
         templateValues['message2'] = message2
+        templateValues['myScores'] = myScores
 
         templateValues['user'] = user
 
@@ -65,7 +68,8 @@ class studentHandler(webapp2.RequestHandler):
             self.redirect('/createteam?username='+username)
         if submit == 'join':
             teamID = self.request.get('joinTarget')
-            joinResult = addMember(teamID,username)
+            teamRole = self.request.get('teamRole')
+            joinResult = addMember(teamID,username,teamRole)
             if  joinResult == 'fail':
                 self.render_page(message1='join failed!',teamID=teamID)
             elif joinResult == 'lock':
@@ -100,6 +104,9 @@ class studentHandler(webapp2.RequestHandler):
                 self.render_page(voteMessage='Thanks for voting!')
             else :
                 self.render_page(voteMessage='You can vote this work only once!')
+        if submit == 'mutualScore':
+            assignmentTarget = self.request.get('assignmentTarget')
+            self.redirect('/stumutualscore?assignmentName='+assignmentTarget+'&username='+username)
 
 
 

@@ -23,7 +23,8 @@ class createdTeamHandler(webapp2.RequestHandler):
     def post(self):
         username = self.request.get('username')
         teamName = self.request.get('teamName')
-        flag = createTeam(username,teamName)
+        teamRole = self.request.get('teamRole')
+        flag = createTeam(username,teamName,teamRole)
         if flag == 'success':
             updateAssignmentTeam(username,'join')
             self.redirect('/student?username='+username)

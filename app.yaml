@@ -47,7 +47,7 @@ handlers:
 - url: /teamworkcomments
   script: teamworkComments.app
 
-- url: /crossvalue
-  script: team.app
+- url: /stumutualscore
+  script: score.app
 
 

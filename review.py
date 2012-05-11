@@ -25,7 +25,7 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.response.out.write(renderPage)
 
     def post(self):
-        uploadID = int(self.request.get('downloadTarget'))
+        uploadID = int(self.request.get('target'))
         sourceCode_key = UplaodWork.all().filter('uploadID = ',uploadID).get().sourceCode.key()
         self.send_blob(blobstore.BlobInfo.get(sourceCode_key), save_as=True)
 

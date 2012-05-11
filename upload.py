@@ -44,7 +44,8 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             'version':version,
             'description':description,
             'sourceCode':blob_info.key(),
-            'URL':URL
+            'URL':URL,
+            'filename':blob_info.filename
         }
         createUploadWork(paraDic)
         self.redirect('/student?username='+username)

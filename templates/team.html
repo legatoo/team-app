@@ -23,6 +23,8 @@
                 <th>Date</th>
                 <th>Vote</th>
                 <th>Description</th>
+                <th>Filename</th>
+                <th>Download</th>
             </tr>
             {% for upload in uploads%}
             <tr>
@@ -34,7 +36,7 @@
                 <td>{{upload.date}}</td>
                 <td>{{upload.votes}}</td>
                 <td>{{upload.description}}</td>
-
+                <td>{{upload.filename}}</td>
                 <td>
                     <form method="post">
                     <input type="hidden" name="downloadTarget" value={{upload.uploadID}}>

@@ -9,9 +9,20 @@
     <form method="post">
         <table>
             <tr>
-                <td class="label">team name:</td>
+                <td class="label">Team name:</td>
                 <td><input name="teamName" value={{teamName}}></td>
                 <td class="error">{{teamNameError}}</td>
+            </tr>
+            <tr>
+                <td>Choose your Team role:</td>
+
+                <td>
+
+                    <input type="radio" name="teamRole" value="manager">Manager
+                    <input type="radio" name="teamRole" value="code">Code
+                    <input type="radio" name="teamRole" value="test">Test
+                    <input type="radio" name="teamRole" value="document">Document
+                </td></td>
             </tr>
 
         </table>

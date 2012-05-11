@@ -42,6 +42,7 @@ class signupHandler(webapp2.RequestHandler):
         username = self.request.get('username')
         password =self.request.get('password')
         pwAgain = self.request.get('pwAgain')
+        studentID = self.request.get('studentID')
         email = self.request.get('email')
         role = self.request.get('role')
         error = Error()
@@ -55,6 +56,9 @@ class signupHandler(webapp2.RequestHandler):
         elif not ifTwoPasswordSame(password,pwAgain):
             error.ifError = True
             error.pwAgain = 'Make sure this is the same with above'
+        if not input_validation(('studentID',studentID)):
+            error.ifError = True
+            error.studentID = 'invalid studentID. studentID must 8 digits'
         if not input_validation(('email',email)):
             error.ifError = True
             error.email ='This is a invalid email'
@@ -62,10 +66,10 @@ class signupHandler(webapp2.RequestHandler):
             error.roleError = 'Role is required'
 
         if not error.ifError:
-            if ifUsernameOK(username):
-                paraTuple = (username,password,email,role)
+            if not ifUsernameOK(username):
+                paraTuple = (username,password,int(studentID),email,role)
                 addStudent(paraTuple)
-                self.redirect('/welcome?username='+username+'&password='+password)
+                self.redirect('/student?username='+username)
             else:
                 error.username = 'You have already signed up'
                 self.render_page(username= username, email= email, role=role, error=error)

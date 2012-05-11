@@ -1,8 +1,10 @@
+from __future__ import division
 __author__ = 'Steven_yang'
 
 import random
 import string
 import hashlib
+
 
 from google.appengine.ext import db
 from google.appengine.ext.blobstore import blobstore
@@ -10,12 +12,12 @@ from datetime import datetime
 
 
 defaultUsers = [
-    ('qingWANG','wang123456','wangqing@saad.com','teacher'),
-    ('stevenYANG','123456','yifan@gmail.com','student'),
-    ('jingZHU','zhu123456','zhujing@example.com','student'),
-    ('conghuiHE','he123456','conghui@where.com','student'),
-    ('lianDUAN','duan123456','duanlian@what.com','student'),
-    ('xinHAO','hao123456','haoxin@example.com','student')
+    ('qingWANG','wang123456','09388229','wangqing@saad.com','teacher'),
+    ('stevenYANG','123456','09388001','yifan@gmail.com','student'),
+    ('jingZHU','zhu123456','09388002','zhujing@example.com','student'),
+    ('conghuiHE','he123456','09388003','conghui@where.com','student'),
+    ('lianDUAN','duan123456','09388004','duanlian@what.com','student'),
+    ('xinHAO','hao123456','09388005','haoxin@example.com','student')
 ]
 def make_salt():
     return ''.join(random.choice(string.letters) for i in xrange(8))
@@ -41,11 +43,14 @@ class Users(db.Model):
     #reference = db.ReferenceProperty(Team,collection_name=teamMembers,required=False)
     name = db.StringProperty(required=True)
     hashPassword = db.StringProperty(required=True)
+    studentID = db.IntegerProperty(required=True)
+    teamRole = db.StringProperty(required=True,choices=set(['blank','manager','code','test','document']))
     email = db.StringProperty()
     role = db.StringProperty(required=True, choices=set(['teacher','student','TA']))
-    teamID = db.IntegerProperty(required=False)
+    teamID = db.IntegerProperty(required=True)
     hasTeam = db.BooleanProperty()
     leader = db.BooleanProperty()
+
 
 class Assignment(db.Model):
     reference = db.ReferenceProperty(Users, collection_name='assignments', required=True)
@@ -56,7 +61,7 @@ class Assignment(db.Model):
     content = db.TextProperty()
     deadLine = db.DateTimeProperty(required=True)
     releaseTime = db.DateTimeProperty(auto_now_add=True)
-    pubOrTeam = db.StringProperty(required=True)
+    pubOrTeam = db.StringProperty(required=True,choices=set(['team','public']))
 
 
 class Tag(db.Model):
@@ -72,22 +77,23 @@ class UplaodWork(db.Model):
     users = db.ReferenceProperty(Users,collection_name="works",required=True)
     assignments = db.ReferenceProperty(Assignment,collection_name="works",required=True)
     teams = db.ReferenceProperty(Team,collection_name="works",required=True)
-
     uploadID = db.IntegerProperty(required=True)
     assignmentName = db.StringProperty(required=True)
     author = db.StringProperty(required=True)
     title = db.StringProperty(required=True)
     version = db.StringProperty(required=True)
+    description = db.TextProperty(required=True)
     votes = db.IntegerProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
     voterUpList = db.StringListProperty(required=True)
     voterDownList = db.StringListProperty(required=True)
     status = db.StringProperty(required=True)
-    score = db.IntegerProperty(required=True)
+    #score = db.IntegerProperty(required=True)
     URL = db.StringProperty(required=False)
     sourceCode = blobstore.BlobReferenceProperty(required=False)
     document = blobstore.BlobReferenceProperty(required=False)
-    description = db.TextProperty(required=True)
+    filename = db.StringProperty(required=False)
+
 
 
 class Comments(db.Model):
@@ -97,19 +103,31 @@ class Comments(db.Model):
     commentID = db.IntegerProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
     title = db.StringProperty(required=False)
-    #comments = db.StringListProperty(required=True)
+
     #three kind of comment
     uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
     assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=False)
     selfRefference = db.SelfReferenceProperty(collection_name="comments",required=False)
 
 
-class CrossValue(db.Model):
-    team = db.ReferenceProperty(Team,collection_name='crossValues',required=True)
+
+
+class Score(db.Model):
+    user = db.ReferenceProperty(Users,collection_name="scores",required=True)
+    scoreID = db.IntegerProperty(required=True)
+    personScore = db.FloatProperty(required=True)
+    votes = db.IntegerProperty(required=True)
+    username = db.StringProperty(required=True)
     assignmentName = db.StringProperty(required=True)
-    teamID = db.IntegerProperty(required=True)
-    score = db.StringProperty(required=True)
-    status = db.BooleanProperty(required=True)
+    uploadStuff = db.StringListProperty(required=True)
+    confirm = db.BooleanProperty(required=True)
+    scorePeople = db.StringListProperty(required=True)
+    comment = db.StringListProperty(required=True)
+    teamScore = db.FloatProperty(required=False)
+
+    assignment = db.ReferenceProperty(Assignment,collection_name="scores",required=False)
+    team = db.ReferenceProperty(Team,collection_name="scores",required=False)
+
 
 def createDefaultUsers():
     """
@@ -119,15 +137,19 @@ def createDefaultUsers():
     if user_count == 0:
         for user in defaultUsers:
             hashPassword = make_pw_hash(user[0],user[1])
-            new_user = Users( name = user[0], hashPassword = hashPassword,
-                email = user[2], role = user[3],  hasTeam = False, leader = False)
+            new_user = Users( name = user[0], hashPassword = hashPassword,studentID=int(user[2]),
+                email = user[3], role = user[4],  hasTeam = False, leader = False, teamRole='blank',
+                teamID = 0)
             new_user.put()
 
 def addStudent(paraTuple):
     hashPassword = make_pw_hash(paraTuple[0],paraTuple[1])
-    new_user = Users(name = paraTuple[0], password = hashPassword,
-        email = paraTuple[2], role = paraTuple[3], leader = False, hasTeam = False)
+    new_user = Users(name = paraTuple[0], hashPassword = hashPassword,studentID=paraTuple[2],
+        email = paraTuple[3], role = paraTuple[4], leader = False, hasTeam = False, teamRole='blank',
+        teamID = 0)
     new_user.put()
+
+
 
 def user_validation(username,password):
     user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
@@ -148,10 +170,7 @@ def user_validation(username,password):
 
 def ifUsernameOK(username):
     result = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
-    if result:
-        return False
-    else:
-        return True
+    return result.get()
 
 def ifTeamNameOK(teamname):
     #team = db.GqlQuery("SELECT * FROM Team WHERE teamName = :1", teamname)
@@ -205,11 +224,7 @@ def query_tags():
     return tags
 
 def returnStuANDTeam(username):
-    #user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
-    #fetchUser = user.get()
-    #teamID =fetchUser.teamID
-    #members = db.GqlQuery("SELECT * FROM Users WHERE teamID = :1",teamID)
-    #fetchMembers = members.fetch(10)
+
     user = Users.all().filter('name = ',username).get()
     team = db.GqlQuery("SELECT * FROM Team WHERE teamMember = :1",username)
     fetchTeam = team.get()
@@ -230,6 +245,9 @@ def quitTeam(username):
     #user = Users.all().filter('teamID = ', team.teamID).get()
     user = Users.all().filter('name = ',username).get()
     team = Team.all().filter('teamID = ',user.teamID).get()
+    scores = Score.all().filter('username = ',user.name)
+    for score in scores:
+        score.delete()
     if team and team.lock == True:
         return 'lock'
     elif  team and user:
@@ -238,6 +256,7 @@ def quitTeam(username):
             user.hasTeam = False
             user.teamID = 0
             user.leader = False
+            user.teamRole = 'blank'
             user.put()
 
         else:
@@ -245,8 +264,8 @@ def quitTeam(username):
             team.teamMember = members
             user.hasTeam = False
             user.teamID = 0
-
-            if user.leader == True:
+            user.teamRole = 'blank'
+            if user.leader:
                 user.leader = False
                 nextUser = Users.all().filter('name = ',members[0]).get()
                 nextUser.leader = True
@@ -259,10 +278,10 @@ def quitTeam(username):
         return 'fail'
 
 
-def createTeam(username, teamName):
+def createTeam(username, teamName,teamRole):
     userInfo = db.GqlQuery("SELECT * FROM Users WHERE name = :1", username)
-    result = userInfo.get()
-    if not result.hasTeam:
+    user = userInfo.get()
+    if not user.hasTeam:
         if not ifTeamNameOK(teamName):
             now = datetime.now()
             teamID = int(str(now.hour)+str(now.minute)+str(now.second))
@@ -271,17 +290,18 @@ def createTeam(username, teamName):
                             teamMember =teamMember,teamLeader = username,lock = False)
 
             new_Team.put()
-            result.hasTeam = True
-            result.leader = True
-            result.teamID = teamID
-            result.put()
+            user.hasTeam = True
+            user.leader = True
+            user.teamID = teamID
+            user.teamRole = teamRole
+            user.put()
             return 'success'
         else:
             return 'teamExisted'
     else:
         return 'hadTeam'
 
-def addMember(teamID,username):
+def addMember(teamID,username,teamRole):
     user = db.GqlQuery("SELECT * FROM Users WHERE name =:1", username)
     userResult = user.get()
     teamID = int(teamID)
@@ -294,6 +314,7 @@ def addMember(teamID,username):
     elif  teamResult and userResult:
         userResult.teamID = int(teamID)
         userResult.hasTeam = True
+        userResult.teamRole = teamRole
         teamMember =teamResult.teamMember
         teamMember.append(username)
         teamResult.teamMember = teamMember
@@ -305,14 +326,16 @@ def addMember(teamID,username):
 def createAssignment(paraDictionary):
     creator = Users.all().filter('name = ',paraDictionary['username']).get()
     receivers = []
+    users = Users.all()
     if paraDictionary['receiver'] == 'public':
-        users = Users.all()
         for user in users:
             receivers.append(user.name)
+
     if paraDictionary['receiver'] == 'team':
         teams = Team.all()
         for team in teams:
             receivers += team.teamMember
+        users = users.filter('teamID != ',0)
     new_assignment = Assignment(
         reference=creator,
         assignmentName=paraDictionary['assignmentName'],
@@ -323,6 +346,7 @@ def createAssignment(paraDictionary):
         pubOrTeam = paraDictionary['receiver']
     )
     new_assignment.put()
+
     for tagName in paraDictionary['tagNames']:
         tag = createTag(tagName)
         assignmentTag = AssignmentKey(assignments = new_assignment,tags = tag)
@@ -418,7 +442,7 @@ def createUploadWork(paraDic):
     user = Users.all().filter('name = ',paraDic['username']).get()
     assignment = Assignment.all().filter('assignmentName = ',paraDic['assignmentName']).get()
     team = Team.all().filter('teamID = ',user.teamID).get()
-
+    score = createScore(user,assignment,team)
     for work in team.works:
         work.status = 'inactive'
         work.put()
@@ -437,17 +461,21 @@ def createUploadWork(paraDic):
         description = paraDic['description'],
         sourceCode = paraDic['sourceCode'],
         URL = paraDic['URL'],
-        score = 0,
+        filename = paraDic['filename'],
+        #score = 0,
         votes = 0
     )
     new_uploadWork.put()
-
+    score.uploadStuff.append(paraDic['filename'])
+    score.put()
 
 def voteWork(vote):
     votes = vote.split('+')
-    work = UplaodWork.all().filter('uploadID = ',int(votes[2])).get()
+    work = UplaodWork.all().filter('uploadID = ',int(votes[3])).get()
     username = votes[0]
-
+    assignmentName = work.assignmentName
+    user = Users.all().filter('name = ',votes[2]).get()
+    score = user.scores.filter('assignmentName = ',assignmentName).get()
     if votes[1] == 'up':
         if username in work.voterUpList:
             return False
@@ -456,6 +484,8 @@ def voteWork(vote):
             voterDownList = filter(lambda a: a!=username,work.voterDownList)
             work.voterDownList = voterDownList
             work.votes += 1
+            score.votes += 1
+
     if votes[1] == 'down':
         if username in work.voterDownList:
             return False
@@ -464,7 +494,9 @@ def voteWork(vote):
             voterUpList = filter(lambda a: a!=username,work.voterUpList)
             work.voterUpList = voterUpList
             work.votes -= 1
+            score.votes -= 1
     work.put()
+    score.put()
     return True
 
 
@@ -481,37 +513,39 @@ def queryStudentWorks(assignmentName):
     #works = assignment.works.order('-date').fetch(100)
     return (teams,assignment)
 
-def createCrossValues(teamID,assignmentName):
-    query = db.GqlQuery("SELECT * FROM CrossValue WHERE teamID = :1 AND assignmentName = :2"
-        ,teamID,assignmentName).get()
-    team = Team.all().filter('teamID = ',teamID).get()
-    works = team.works.filter('assignmentName = ',assignmentName).fetch(50)
-    values = {}
-    for work in works:
-        if work.author in values.keys():
-            values[work.author] += work.votes
-        else:
-            values[work.author] = work.votes
-    result = '|'.join( list( item+':'+str(values[item])  for item in values.keys()) )
+def createScore(user,assignment,team):
+    new_score = Score(
+        scoreID = user.studentID + random.randrange(100001),
+        user = user,
+        assignment = assignment,
+        username = user.name,
+        assignmentName = assignment.assignmentName,
+        team = team,
+        votes = 0,
+        personScore = 0.0,
+        uploadStuff = [],
+        scorePeople = [],
+        comment = [],
+        confirm = False
+    )
+    new_score.put()
+    return new_score
 
-    if query:
-        query.score = result
-        query.put()
-        return (query,query.status)
+def scoreMem(scorer,scoreTarget,scoreNumber,comment):
+    score = Score.all().filter('scoreID = ',scoreTarget).get()
+    if scorer in score.scorePeople:
+        return 'scored'
     else:
+        score.scorePeople.append(scorer)
+        if score.personScore == 0:
+            score.personScore += scoreNumber
+        else:
+            score.personScore += scoreNumber
+            score.personScore = score.personScore/2
+        finalComment = scorer+': '+comment+' '
+        score.comment.append(finalComment)
 
-        new_crossValue = CrossValue(
-            team = team,
-            assignmentName = assignmentName,
-            teamID = team.teamID,
-            score = result,
-            status = False
-        )
-        new_crossValue.put()
-        return (new_crossValue,new_crossValue.status)
+        score.put()
+        return 'success'
 
-def confirmCrossValue(teamID,assignmentName):
-    query = db.GqlQuery("SELECT * FROM CrossValue WHERE teamID = :1 AND assignmentName = :2"
-        ,teamID,assignmentName).get()
-    query.status = True
-    query.put()
+

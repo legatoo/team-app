@@ -20,9 +20,9 @@
         <tr>
             <th>Team</th>
             <th>TeamLeader</th>
-            <th>UploadID</th>
+
             <th>Uploder</th>
-            <th>Author</th>
+
             <th>Title</th>
             <th>Version</th>
             <th>Date</th>
@@ -30,6 +30,7 @@
             <th>Status</th>
             <th>URL</th>
             <th>Description</th>
+            <th>Filename</th>
             <th>Download sourceCode</th>
         </tr>
         {% for team in teams%}
@@ -38,21 +39,22 @@
         <tr>
             <td>{{team.teamName}}</td>
             <td>{{team.teamLeader}}</td>
-            <td>{{upload.uploadID}}</td>
+
             <td>{{upload.author}}</td>
             <td>{{upload.title}}</td>
             <td>{{upload.version}}</td>
             <td>{{upload.date}}</td>
             <td>{{upload.votes}}</td>
             <td>{{upload.status}}</td>
-            <td><a href={{upload.URL}}>URL</a></td>
+            <td><a href="{{upload.URL}}">URL</a></td>
             <td>{{upload.description}}</td>
-
+            <td>{{upload.filename}}</td>
             <td>
                 {% ifequal upload.status "active"%}
                 <form method="post" name="downloadForm">
-                <input type="hidden" name="downloadTarget" value={{upload.uploadID}}>
+                <input type="hidden" name="target" value={{upload.uploadID}}>
                 <input type="submit" name="submit" value="Download">
+                <input type="submit" name="submit" value="score">
                 </form>
                 {% endifequal%}
             </td>

@@ -12,19 +12,23 @@
         <table class="showUser">
             <tr>
                 <th>student name</th>
+                <th>studentID</th>
                 <th>hasTeam</th>
                 <th>leader</th>
                 <th>email</th>
                 <th>teamID</th>
+                <th>team Role</th>
             </tr>
             {% if students%}
             {% for student in students%}
             <tr>
                 <td>{{student.name}}</td>
+                <td>{{student.studentID}}</td>
                 <td>{{student.hasTeam}}</td>
                 <td>{{student.leader}}</td>
                 <td>{{student.email}}</td>
                 <td>{{student.teamID}}</td>
+                <td>{{student.teamRole}}</td>
                 <td>
                     <form method="post" name="deleteForm">
                     <input type="hidden" name="delete" value="yes">
