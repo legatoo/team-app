@@ -56,10 +56,6 @@ class teacherHanlder(webapp2.RequestHandler):
                 delete_student(deleteTarget)
                 self.render_page()
         if submit == 'Add Student':
-            #addUser = self.request.get('addUser')
-            #if addUser == 'yes':
-                #messge = 'Add A New Student'
-                #self.redirect('/signup?message='+messge)
             self.redirect('/addstudent')
         if submit == 'releaseAssignment':
             username = self.request.get('username')

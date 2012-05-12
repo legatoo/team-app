@@ -59,6 +59,7 @@ class Assignment(db.Model):
     author = db.StringProperty(required=True)
     #tag = db.StringProperty(required=True)
     receivers = db.StringListProperty(required= True)
+    topThree = db.StringListProperty(required=True)
     content = db.TextProperty()
     deadLine = db.DateTimeProperty(required=True)
     releaseTime = db.DateTimeProperty(auto_now_add=True)
@@ -94,6 +95,7 @@ class UplaodWork(db.Model):
     sourceCode = blobstore.BlobReferenceProperty(required=False)
     document = blobstore.BlobReferenceProperty(required=False)
     filename = db.StringProperty(required=False)
+    #teamScore = db.ReferenceProperty(TeamScore,collection_name="works",required=False)
 
 
 
@@ -126,8 +128,16 @@ class Score(db.Model):
     teammateComment = db.StringListProperty(required=True)
     teamScore = db.FloatProperty(required=False)
     teacherComment = db.TextProperty(required=False)
+
     assignment = db.ReferenceProperty(Assignment,collection_name="scores",required=False)
     team = db.ReferenceProperty(Team,collection_name="scores",required=False)
+
+class TeamScore(db.Model):
+
+    teamName = db.StringProperty(required=True)
+    score = db.FloatProperty(required=True)
+    comment = db.TextProperty(required=False)
+    rank = db.IntegerProperty(required=False)
 
 
 def createDefaultUsers():
@@ -562,6 +572,7 @@ def scoreMem(scorer,scoreTarget,scoreNumber,comment):
 
 def teacherScore(teamID,assignmentName,teamScore,teamComment):
     team = Team.all().filter('teamID = ',teamID).get()
+    assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
     for user in team.teamMembers:
         for score in user.scores:
             if score.assignmentName == assignmentName:
@@ -569,3 +580,29 @@ def teacherScore(teamID,assignmentName,teamScore,teamComment):
                 score.teamScore = teamScore
                 score.put()
 
+    new_teamScore = TeamScore(
+        teamName = team.teamName,
+        score = teamScore,
+        comment = teamComment
+    )
+    new_teamScore.put()
+    assignment.topThree.append(team.teamName)
+    assignment.put()
+    sortTeamScore(assignment,new_teamScore)
+
+
+
+def sortTeamScore(assignment,teamScore):
+    topThree = assignment.topThree
+    topThree = sorted(topThree,cmp=cmpScore)
+    index = topThree.index(teamScore.teamName) + 1
+    teamScore.rank = index
+    assignment.topThree = topThree
+    assignment.put()
+    teamScore.put()
+
+
+def cmpScore(name1,name2):
+    entity1 = TeamScore.all().filter('teamName = ',name1).get()
+    entity2 = TeamScore.all().filter('teamName = ',name2).get()
+    return int(entity2.score - entity1.score)

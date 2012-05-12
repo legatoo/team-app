@@ -17,6 +17,7 @@ from dataTable import addMember
 from dataTable import quitTeam
 from dataTable import updateAssignmentTeam
 from dataTable import voteWork
+from dataTable import TeamScore
 
 class studentHandler(webapp2.RequestHandler):
 
@@ -25,6 +26,7 @@ class studentHandler(webapp2.RequestHandler):
         form  = os.path.join(os.path.dirname(__file__),'templates/student.html')
         username = self.request.get('username')
         user = Users.all().filter('name = ',username).get()
+        #ranks = TeamScore
 
         if not ifHasTeam(username):
             templateValues['hasTeam'] = 'no'
@@ -42,6 +44,7 @@ class studentHandler(webapp2.RequestHandler):
 
 
         myScores = Score.all().filter('username = ',username)
+
         templateValues['assignments'] = assignments
         templateValues['voteMessage'] = voteMessage
         templateValues['username'] = username

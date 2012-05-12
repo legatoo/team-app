@@ -107,6 +107,10 @@
     {%if assignments%}
     {%for assignment in assignments%}
 
+        {% for score in assignment.topThree%}
+            <a href="www.google.com">{{score}}</a>
+        {% endfor%}
+
         <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}&username={{username}}">
             Assignment name:  {{assignment.assignmentName}}</a>
         </div>
@@ -162,6 +166,10 @@
     {%endfor%}
     {% endif%}
 
+    {% if ranks%}
+
+    {% endif%}
+
     {% if myScores%}
         <div><b>Your score</b></div>
         <dl>
@@ -171,7 +179,9 @@
             <dd>-stuff you uploaded:{% for item in score.uploadStuff%} {{item}}. {% endfor%}</dd>
             <dd>-votes: {{score.votes}}</dd>
             <dd>-person score: {{score.personScore}}</dd>
-            <dd>-comments: {% for comment in score.teammateComment%} {{comment}}. {% endfor%}</dd>
+            <dd>-teammate comments: {% for comment in score.teammateComment%} {{comment}}. {% endfor%}</dd>
+            <dd>-teacher score: {{score.teamScore}}</dd>
+            <dd>-teacher comment: {{score.teacherComment}}</dd>
             {% endfor%}
         </dl>
         {% endif%}
