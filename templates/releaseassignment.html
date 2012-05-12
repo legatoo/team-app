@@ -3,38 +3,41 @@
 <html>
     <head>
         <title>Release Assignment</title>
+        <link type="text/css" href="/css/ui-lightness/jquery-ui-1.8.20.custom.css" rel="stylesheet" />
+        <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                $( "#id_myDate" ).datepicker({
+                    inline: true
+                });
+            });
+        </script>
+
     </head>
     <body>
+
         <h1>Release Assignment</h1>
         <h2>{{username}},here you can release an assignment to students or teams</h2>
         <form method="post">
-            <table>
-                <tr>
-                    <td>Assignment name:</td>
-                    <td><input type="text" name="assignmentName" value={{assignmentName}}></td>
-                    <td><b>{{assignmentNameError}}</b></td>
-                </tr>
 
-                <tr>
-                    <td>Tag:</td>
-                    <td><input type="text" name="tagNames" value={{tagName}}></td>
-                </tr>
+            <div>Assignment name:</div>
+            <div><input type="text" name="assignmentName" value={{assignmentName}}></div>
+            <div><b>{{assignmentNameError}}</b></div>
+
+            <div>Tag:</div>
+            <div><input type="text" name="tagNames" value={{tagName}}></div>
 
 
-                <tr>
-                    <td>Receiver:</td>
-                    <td><input type="radio" name="receiver" value="public">public</td>
-                    <td><input type="radio" name="receiver" value="team">team</td>
-                </tr>
 
-                <tr>
-                    <td>DeadLine:</td>
-                    <td><input type="text" name="year">year</td>
-                    <td><input type="text" name="month">month</td>
-                    <td><input type="text" name="day">day</td>
-                    <td><b>{{deadLineError}}</b></td>
-                </tr>
-            </table>
+
+            <div>Receiver:</div>
+            <div><input type="radio" name="receiver" value="public">public</div>
+            <div><input type="radio" name="receiver" value="team">team</div>
+            <div>Date: <input type="text" id="id_myDate" name="deadLine"></div>
+            <div><b>{{deadLineError}}</b></div>
+
+
             <div>Assignment Requirement</div>
             <textarea name="assignmentContent" rows="16" cols="100">{{assignmentContent|escape}}</textarea>
             <div><b>{{contentError}}</b></div>

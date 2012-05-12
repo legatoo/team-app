@@ -56,10 +56,11 @@ class teacherHanlder(webapp2.RequestHandler):
                 delete_student(deleteTarget)
                 self.render_page()
         if submit == 'Add Student':
-            addUser = self.request.get('addUser')
-            if addUser == 'yes':
-                messge = 'Add A New Student'
-                self.redirect('/signup?message='+messge)
+            #addUser = self.request.get('addUser')
+            #if addUser == 'yes':
+                #messge = 'Add A New Student'
+                #self.redirect('/signup?message='+messge)
+            self.redirect('/addstudent')
         if submit == 'releaseAssignment':
             username = self.request.get('username')
             self.redirect('/releaseassignment?username='+username)
@@ -85,7 +86,12 @@ class teacherHanlder(webapp2.RequestHandler):
 class releaseAssignmentHandler(webapp2.RequestHandler):
     def get(self):
         self.render_page()
-    def render_page(self, assignmentName='',assignmentNameError='',tagName='', assignmentContent='',contentError='',deadLineError=''):
+    def render_page(self, assignmentName='',
+                    assignmentNameError='',
+                    tagName='',
+                    assignmentContent='',
+                    contentError='',
+                    deadLineError=''):
         form = os.path.join(os.path.dirname(__file__),'templates/releaseassignment.html')
         templateValues = {}
         username = self.request.get('username')
@@ -107,12 +113,16 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
         username = self.request.get('username')
         assignmentName = self.request.get('assignmentName')
         tagName = str(self.request.get('tagNames'))
-
-        receiver = self.request.get('receiver')
-        deadline = datetime( int(self.request.get('year')),
-                             int(self.request.get('month')),
-                             int(self.request.get('day')))
         assignmentContent = self.request.get('assignmentContent')
+        receiver = self.request.get('receiver')
+        dueTime = self.request.get('deadLine')
+        deadlineDMY = dueTime.split('/')
+        deadline = datetime(
+            int(deadlineDMY[2]),
+            int(deadlineDMY[0]),
+            int(deadlineDMY[1]),
+        )
+
         now = datetime.now()
         if now > deadline:
             self.render_page(

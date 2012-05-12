@@ -14,7 +14,7 @@ from dataTable import user_validation
 
 regexDic = { 'username':r'^[a-zA-Z0-9_-]{3,20}$',
              'password':r'^.{3,20}$',
-             'studentID':r'^[0-9]{8}$',
+             'studentID':r'^[0-9]{8,10}$',
              'email':r'^[\S]+@[\S]+\.[\S]+$'
              }
 
