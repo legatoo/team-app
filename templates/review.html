@@ -54,8 +54,9 @@
                 <form method="post" name="downloadForm">
                 <input type="hidden" name="target" value={{upload.uploadID}}>
                 <input type="submit" name="submit" value="Download">
-
-                <input type="submit" name="submit" value="score">
+                <input type="hidden" name="teamID" value={{team.teamID}}>
+                <input type="hidden" name="assignmentName" value={{assignment.assignmentName}}>
+                <input type="submit" name="submit" value="Score">
                 </form>
                 {% endifequal%}
             </td>

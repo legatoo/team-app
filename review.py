@@ -30,6 +30,9 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
             uploadID = int(self.request.get('target'))
             sourceCode_key = UplaodWork.all().filter('uploadID = ',uploadID).get().sourceCode.key()
             self.send_blob(blobstore.BlobInfo.get(sourceCode_key), save_as=True)
-
+        if submit == 'Score':
+            teamID = self.request.get('teamID')
+            assignmentName = self.request.get('assignmentName')
+            self.redirect('/teachergrade?teamID='+teamID+'&assignmentName='+assignmentName)
 
 app = webapp2.WSGIApplication([('/teacher/review',reviewHandler)],debug=True)

@@ -123,9 +123,9 @@ class Score(db.Model):
     uploadStuff = db.StringListProperty(required=True)
     confirm = db.BooleanProperty(required=True)
     scorePeople = db.StringListProperty(required=True)
-    comment = db.StringListProperty(required=True)
+    teammateComment = db.StringListProperty(required=True)
     teamScore = db.FloatProperty(required=False)
-
+    teacherComment = db.TextProperty(required=False)
     assignment = db.ReferenceProperty(Assignment,collection_name="scores",required=False)
     team = db.ReferenceProperty(Team,collection_name="scores",required=False)
 
@@ -537,7 +537,7 @@ def createScore(user,assignment,team):
             personScore = 0.0,
             uploadStuff = [],
             scorePeople = [],
-            comment = [],
+            teammateComment = [],
             confirm = False
         )
         new_score.put()
@@ -555,9 +555,17 @@ def scoreMem(scorer,scoreTarget,scoreNumber,comment):
             score.personScore += scoreNumber
             score.personScore = score.personScore/2
         finalComment = scorer+': '+comment+' '
-        score.comment.append(finalComment)
+        score.teammateComment.append(finalComment)
 
         score.put()
         return 'success'
 
+def teacherScore(teamID,assignmentName,teamScore,teamComment):
+    team = Team.all().filter('teamID = ',teamID).get()
+    for user in team.teamMembers:
+        for score in user.scores:
+            if score.assignmentName == assignmentName:
+                score.teacherComment = teamComment
+                score.teamScore = teamScore
+                score.put()
 

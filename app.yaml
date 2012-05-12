@@ -59,6 +59,9 @@ handlers:
 - url: /addstudent
   script: addStudent.app
 
+- url: /teachergrade
+  script: teacherGrade.app
+
 
 
 
