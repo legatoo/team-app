@@ -9,7 +9,7 @@ from dataTable import Team
 from dataTable import Score
 from dataTable import Assignment
 from dataTable import scoreMem
-
+from dataTable import cookieUsername
 
 
 class stuMutualScoreHandler(webapp2.RequestHandler):
@@ -19,7 +19,8 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
     def render_page(self,message='',confirmMessage='',error=''):
         form = os.path.join(os.path.dirname(__file__),'templates/stumutualscore.html')
         templateValues = {}
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         assignmentName = self.request.get('assignmentName')
         user = Users.all().filter('name = ',username).get()
         team = Team.all().filter('teamID = ',user.teamID).get()
@@ -43,7 +44,8 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
 
     def post(self):
         submit = self.request.get('submit')
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         if submit == 'submit':
             score = self.request.get('scoreNumber')
             scoreTarget = int(self.request.get('scoreTarget'))
@@ -75,7 +77,7 @@ class stuMutualScoreHandler(webapp2.RequestHandler):
             for memberScore in memberScores:
                 memberScore.confirm = True
                 memberScore.put()
-            self.redirect('/student?username='+username)
+            self.redirect('/student')
 
 
 app = webapp2.WSGIApplication([('/stumutualscore',stuMutualScoreHandler)],debug=True)

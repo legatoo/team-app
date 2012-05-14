@@ -11,9 +11,7 @@ from dataTable import Users
 from dataTable import Team
 from dataTable import UplaodWork
 from dataTable import teamAssignmentsCollection
-
-
-
+from dataTable import cookieUsername
 
 
 class teamHandler(blobstore_handlers.BlobstoreDownloadHandler):
@@ -21,7 +19,8 @@ class teamHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.render_page()
     def render_page(self):
         form = os.path.join(os.path.dirname(__file__),'templates/team.html')
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         assignmentName = self.request.get('assignmentName')
         teamID = Users.all().filter('name = ',username).get().teamID
         teamName = Team.all().filter('teamID = ',teamID).get().teamName

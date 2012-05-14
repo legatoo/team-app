@@ -18,15 +18,17 @@ from dataTable import quitTeam
 from dataTable import updateAssignmentTeam
 from dataTable import voteWork
 from dataTable import TeamScore
+from dataTable import cookieUsername
 
 class studentHandler(webapp2.RequestHandler):
 
     def render_page(self,message1='',message2='',teamID='',voteMessage = ''):
         templateValues = {}
         form  = os.path.join(os.path.dirname(__file__),'templates/student.html')
-        username = self.request.get('username')
-        user = Users.all().filter('name = ',username).get()
-        #ranks = TeamScore
+        #username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        user = cookieUsername(user_cookie)
+        username = user.name
 
         if not ifHasTeam(username):
             templateValues['hasTeam'] = 'no'
@@ -60,12 +62,13 @@ class studentHandler(webapp2.RequestHandler):
         self.render_page()
 
     def post(self):
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         submit = self.request.get('submit')
 
         if submit == 'create':
 
-            self.redirect('/createteam?username='+username)
+            self.redirect('/createteam')
         if submit == 'join':
             teamID = self.request.get('joinTarget')
             teamRole = self.request.get('teamRole')
@@ -88,10 +91,10 @@ class studentHandler(webapp2.RequestHandler):
                 self.render_page(message2='quit failed!')
         if submit == 'upload':
             assignmentTarget = self.request.get('assignmentTarget')
-            self.redirect('/upload?assignmentName='+assignmentTarget+'&username='+username)
+            self.redirect('/upload?assignmentName='+assignmentTarget)
         if submit == 'download':
             assignmentTarget = self.request.get('assignmentTarget')
-            self.redirect('/team?assignmentName='+assignmentTarget+'&username='+username)
+            self.redirect('/team?assignmentName='+assignmentTarget)
         if submit == 'voteUp':
             vote = self.request.get('voteUp')
             if voteWork(vote):
@@ -106,7 +109,7 @@ class studentHandler(webapp2.RequestHandler):
                 self.render_page(voteMessage='You can vote this work only once!')
         if submit == 'mutualScore':
             assignmentTarget = self.request.get('assignmentTarget')
-            self.redirect('/stumutualscore?assignmentName='+assignmentTarget+'&username='+username)
+            self.redirect('/stumutualscore?assignmentName='+assignmentTarget)
 
 
 

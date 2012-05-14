@@ -6,7 +6,7 @@ from google.appengine.ext.webapp import template
 
 from dataTable import createTeam
 from dataTable import updateAssignmentTeam
-
+from dataTable import cookieUsername
 
 class createdTeamHandler(webapp2.RequestHandler):
     def render_page(self,teamName='',error=''):
@@ -21,7 +21,8 @@ class createdTeamHandler(webapp2.RequestHandler):
         self.render_page()
 
     def post(self):
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         teamName = self.request.get('teamName')
         teamRole = self.request.get('teamRole')
         flag = createTeam(username,teamName,teamRole)

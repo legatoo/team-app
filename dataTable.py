@@ -159,6 +159,7 @@ def addStudent(paraTuple):
         email = paraTuple[3], role = paraTuple[4], leader = False, hasTeam = False, teamRole='blank',
         teamID = 0)
     new_user.put()
+    return new_user
 
 
 
@@ -606,3 +607,9 @@ def cmpScore(name1,name2):
     entity1 = TeamScore.all().filter('teamName = ',name1).get()
     entity2 = TeamScore.all().filter('teamName = ',name2).get()
     return int(entity2.score - entity1.score)
+
+def cookieUsername(user_cookie):
+    cookieDigest = user_cookie.split('|')
+    uid = int(cookieDigest[0])
+    user = Users.get_by_id(uid)
+    return user

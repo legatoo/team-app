@@ -7,14 +7,16 @@ from google.appengine.ext.blobstore import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 
 from dataTable import createUploadWork
-
+from dataTable import cookieUsername
 
 class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.render_page()
 
     def render_page(self,uploadMessage=''):
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
         assignmentName = self.request.get('assignmentName')
         upload_url = blobstore.create_upload_url('/upload?assignmentName='+assignmentName+'&username='+username)
         form = os.path.join(os.path.dirname(__file__),'templates/upload.html')
@@ -30,7 +32,9 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
         blob_info = upload_files[0]
-        username = self.request.get('username')
+        
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         assignmentName = self.request.get('assignmentName')
         title = self.request.get('uploadTitle')
         version = self.request.get('uploadVersion')
@@ -49,7 +53,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             'filename':blob_info.filename
         }
         if createUploadWork(paraDic):
-            self.redirect('/student?username='+username)
+            self.redirect('/student')
         else:
             self.render_page(uploadMessage='Bad luck! This assignment is expired!')
 

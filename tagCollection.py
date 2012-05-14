@@ -8,7 +8,7 @@ from google.appengine.ext.webapp import  template
 
 from dataTable import createAssignmentComment
 from dataTable import commentAcomment
-
+from dataTable import cookieUsername
 
 class tagCollectionHandler(webapp2.RequestHandler):
     def get(self):
@@ -39,7 +39,8 @@ class assignmentWallHandler(webapp2.RequestHandler):
 
     def post(self):
         submit = self.request.get('submit')
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         assignmentName = self.request.get('assignmentName')
         if submit == 'comment':
             content = self.request.get('content')

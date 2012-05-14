@@ -2,6 +2,7 @@ __author__ = 'Steven_yang'
 
 import os
 import re
+import hashlib
 
 
 import webapp2
@@ -44,6 +45,7 @@ class loginHandler(webapp2.RequestHandler):
 
 
     def get(self):
+        self.response.delete_cookie('user')
         createDefaultUsers()
         self.render_page()
 
@@ -60,10 +62,16 @@ class loginHandler(webapp2.RequestHandler):
         else:
             templateValues = user_validation(username,password)
             if templateValues['haveUser'] == 'yes':
+                uid = templateValues['user'].key().id()
+                hash_cookie = hashlib.sha256(username).hexdigest()
+                cookie = str(uid)+'|'+hash_cookie
+                self.response.headers.add_header('Set-Cookie', 'user=%s' % cookie)
+
                 if templateValues['user'].role == 'teacher':
-                    self.redirect('/teacher?username=' + username)
+                    self.redirect('/teacher')
                 if templateValues['user'].role == 'student':
-                    self.redirect('/student?username=' + username)
+                    self.redirect('/student')
+
             if templateValues['haveUser'] == 'no':
                 self.render_page(haveUser='no')
 

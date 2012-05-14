@@ -12,7 +12,7 @@ from dataTable import UplaodWork
 from dataTable import Assignment
 from dataTable import createUploadComment
 from dataTable import commentAcomment
-
+from dataTable import cookieUsername
 
 class teamworkCommentHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
@@ -35,13 +35,14 @@ class teamworkCommentHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def post(self):
         submit = self.request.get('submit')
 
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
         uploadID = int(self.request.get('uploadID'))
 
         uploadWork = UplaodWork.all().filter('uploadID = ',uploadID).get()
         assignmentName =uploadWork.assignmentName
         if submit == 'Download':
-            self.redirect('/team?assignmentName='+assignmentName+'&username='+username)
+            self.redirect('/team?assignmentName='+assignmentName)
         if submit == 'Comment':
             title = self.request.get('title')
             content = self.request.get('content')

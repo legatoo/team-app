@@ -6,8 +6,10 @@ from google.appengine.ext.blobstore import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 
+from dataTable import Users
 from dataTable import queryStudentWorks
 from dataTable import UplaodWork
+from dataTable import cookieUsername
 
 class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
@@ -16,7 +18,10 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
         form = os.path.join(os.path.dirname(__file__),'templates/review.html')
         templateValues = {}
         assignmentName = self.request.get('assignmentName')
-        username = self.request.get('username')
+
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
         (teams,assignment) = queryStudentWorks(assignmentName)
         templateValues['teams'] = teams
         templateValues['assignment'] = assignment

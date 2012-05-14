@@ -1,10 +1,12 @@
 __author__ = 'Steven_yang'
 
 import os
+import hashlib
 
 from login import input_validation
 from dataTable import ifUsernameOK
 from dataTable import addStudent
+
 
 import webapp2
 from google.appengine.ext.webapp import template
@@ -68,8 +70,12 @@ class signupHandler(webapp2.RequestHandler):
         if not error.ifError:
             if not ifUsernameOK(username):
                 paraTuple = (username,password,int(studentID),email,role)
-                addStudent(paraTuple)
-                self.redirect('/student?username='+username)
+                user = addStudent(paraTuple)
+                userID = user.key().id()
+                hash_cookie = hashlib.sha256(username).hexdigest()
+                cookie = str(userID)+'|'+hash_cookie
+                self.response.headers.add_header('Set-Cookie', 'user=%s' % cookie)
+                self.redirect('/student')
             else:
                 error.username = 'You have already signed up'
                 self.render_page(username= username, email= email, role=role, error=error)

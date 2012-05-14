@@ -7,6 +7,7 @@ import  webapp2
 
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from dataTable import Users
 from dataTable import Assignment
 from dataTable import query_students
 from dataTable import delete_student
@@ -17,6 +18,7 @@ from dataTable import query_assigments
 from dataTable import updateAssignment
 from dataTable import query_teams
 from dataTable import lockTeam
+from dataTable import cookieUsername
 
 
 def tagDigest(tags):
@@ -24,9 +26,12 @@ def tagDigest(tags):
     return tagList
 
 class teacherHanlder(webapp2.RequestHandler):
-    def render_page(self,editMessage = ''):
+    def render_page(self,editMessage = '',message=''):
         templateValues = {}
-        username = self.request.get('username')
+
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
         templateValues['username'] = username
         students = query_students()
         assignments = query_assigments()
@@ -40,6 +45,7 @@ class teacherHanlder(webapp2.RequestHandler):
         if teams:
             templateValues['teams'] = teams
         templateValues['editMessage'] = editMessage
+        templateValues['message'] = message
         form = os.path.join(os.path.dirname(__file__),'templates/teacher.html')
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
@@ -58,8 +64,7 @@ class teacherHanlder(webapp2.RequestHandler):
         if submit == 'Add Student':
             self.redirect('/addstudent')
         if submit == 'releaseAssignment':
-            username = self.request.get('username')
-            self.redirect('/releaseassignment?username='+username)
+            self.redirect('/releaseassignment')
         if submit == 'editAssignment':
             assignmentName = self.request.get('editTarget')
             now = datetime.now()
@@ -70,8 +75,7 @@ class teacherHanlder(webapp2.RequestHandler):
                 self.render_page(editMessage='You can not edit a expired assignment')
         if submit == 'reviewAssignment':
             assignmentName = self.request.get('reviewTarget')
-            username = self.request.get('username')
-            self.redirect('/teacher/review?assignmentName='+assignmentName+'&username='+username)
+            self.redirect('/teacher/review?assignmentName='+assignmentName)
         if submit == 'lock':
             lockTarget = self.request.get('lockTarget')
             lockTeam(lockTarget)
@@ -90,7 +94,9 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                     deadLineError=''):
         form = os.path.join(os.path.dirname(__file__),'templates/releaseassignment.html')
         templateValues = {}
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
         templateValues['username'] = username
         templateValues['tags'] = query_tags()
         templateValues['assignmentName'] = assignmentName
@@ -106,7 +112,9 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
         """
         release an assignment
         """
-        username = self.request.get('username')
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
         assignmentName = self.request.get('assignmentName')
         tagName = str(self.request.get('tagNames'))
         assignmentContent = self.request.get('assignmentContent')
@@ -154,7 +162,7 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                 }
             createAssignment(paraDictionary)
 
-            self.redirect('/teacher?username='+username)
+            self.redirect('/teacher')
 
 class editAssignmentHandler(webapp2.RequestHandler):
     def get(self):
