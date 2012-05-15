@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
         "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/html">
     <head>
         <title>Welcome</title>
 
@@ -107,9 +107,22 @@
     {%if assignments%}
     {%for assignment in assignments%}
 
-        {% for score in assignment.topThree%}
-            <a href="www.google.com">{{score}}</a>
-        {% endfor%}
+
+        {% if topThree%}
+            <div><b>TOP3:</b></div>
+            {% for top in topThree%}
+                {% ifequal top.0 assignment.assignmentName%}
+                {% for item in top.1%}
+                <div>.................Rank: {{item.rank}}.....................</div>
+                <div>Team name: {{item.teamName}}</div>
+                <div>Score: {{item.score}}</div>
+                <div>Comment: {{item.comment}}</div>
+                <div>......................................................</div>
+                {% endfor%}
+                {% endifequal%}
+
+            {% endfor%}
+        {% endif%}
 
         <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}&username={{username}}">
             Assignment name:  {{assignment.assignmentName}}</a>
@@ -149,6 +162,20 @@
         <div>{{voteMessage}}</div>
         <a href="/teamworkcomments?username={{username}}&uploadID={{work.uploadID}}">comment</a>
         </form>
+
+
+        <div>Your team score:</div>
+        {% for score in team.teamScores%}
+            {% ifequal score.assignmentName assignment.assignmentName%}
+            <div>Score:{{score.score}}</div>
+            <div>Rank:{{score.rank}}</div>
+            <div>Comment:{{score.comment}}</div>
+            <br>
+            {% endifequal%}
+        {% endfor%}
+
+
+
         {% endifequal%}
         {%endfor%}
         {%ifequal assignment.pubOrTeam "team"%}
@@ -161,6 +188,8 @@
             <input type="submit" name="submit" value="mutualScore">
             </form>
         {%endifequal%}
+
+
 
     <hr>
     {%endfor%}

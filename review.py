@@ -10,11 +10,14 @@ from dataTable import Users
 from dataTable import queryStudentWorks
 from dataTable import UplaodWork
 from dataTable import cookieUsername
+from dataTable import ifScored
+
+
 
 class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
         self.render_page()
-    def render_page(self):
+    def render_page(self,message = ''):
         form = os.path.join(os.path.dirname(__file__),'templates/review.html')
         templateValues = {}
         assignmentName = self.request.get('assignmentName')
@@ -26,6 +29,7 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
         templateValues['teams'] = teams
         templateValues['assignment'] = assignment
         templateValues['username'] = username
+        templateValues['message'] = message
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
@@ -38,6 +42,9 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
         if submit == 'Score':
             teamID = self.request.get('teamID')
             assignmentName = self.request.get('assignmentName')
-            self.redirect('/teachergrade?teamID='+teamID+'&assignmentName='+assignmentName)
+            if ifScored(int(teamID),assignmentName):
+                self.render_page(message = 'This team has been scored!')
+            else:
+                self.redirect('/teachergrade?teamID='+teamID+'&assignmentName='+assignmentName)
 
 app = webapp2.WSGIApplication([('/teacher/review',reviewHandler)],debug=True)

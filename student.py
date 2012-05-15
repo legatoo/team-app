@@ -20,6 +20,17 @@ from dataTable import voteWork
 from dataTable import TeamScore
 from dataTable import cookieUsername
 
+
+def findTop3(assignments):
+    topThree = []
+    for assignment in assignments:
+        if assignment.topThree:
+            top3 = assignment.topThree.order('-score').fetch(3)
+            topThree.append((assignment.assignmentName,top3))
+            return topThree
+        else:
+            return None
+
 class studentHandler(webapp2.RequestHandler):
 
     def render_page(self,message1='',message2='',teamID='',voteMessage = ''):
@@ -47,11 +58,14 @@ class studentHandler(webapp2.RequestHandler):
 
         myScores = Score.all().filter('username = ',username)
 
+        topThree = findTop3(assignments)
+
         templateValues['assignments'] = assignments
         templateValues['voteMessage'] = voteMessage
         templateValues['username'] = username
         templateValues['message2'] = message2
         templateValues['myScores'] = myScores
+        templateValues['topThree'] = topThree
 
         templateValues['user'] = user
 
@@ -110,8 +124,6 @@ class studentHandler(webapp2.RequestHandler):
         if submit == 'mutualScore':
             assignmentTarget = self.request.get('assignmentTarget')
             self.redirect('/stumutualscore?assignmentName='+assignmentTarget)
-
-
 
 
 app = webapp2.WSGIApplication([('/student',studentHandler)], debug=True)

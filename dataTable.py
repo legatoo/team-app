@@ -59,7 +59,7 @@ class Assignment(db.Model):
     author = db.StringProperty(required=True)
     #tag = db.StringProperty(required=True)
     receivers = db.StringListProperty(required= True)
-    topThree = db.StringListProperty(required=True)
+    teamScores = db.StringListProperty(required=True)
     content = db.TextProperty()
     deadLine = db.DateTimeProperty(required=True)
     releaseTime = db.DateTimeProperty(auto_now_add=True)
@@ -90,12 +90,13 @@ class UplaodWork(db.Model):
     voterUpList = db.StringListProperty(required=True)
     voterDownList = db.StringListProperty(required=True)
     status = db.StringProperty(required=True)
-    #score = db.IntegerProperty(required=True)
     URL = db.StringProperty(required=False)
     sourceCode = blobstore.BlobReferenceProperty(required=False)
     document = blobstore.BlobReferenceProperty(required=False)
     filename = db.StringProperty(required=False)
-    #teamScore = db.ReferenceProperty(TeamScore,collection_name="works",required=False)
+
+    coordinate = db.GeoPtProperty()
+
 
 
 
@@ -111,8 +112,6 @@ class Comments(db.Model):
     uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
     assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=False)
     selfRefference = db.SelfReferenceProperty(collection_name="comments",required=False)
-
-
 
 
 class Score(db.Model):
@@ -133,12 +132,13 @@ class Score(db.Model):
     team = db.ReferenceProperty(Team,collection_name="scores",required=False)
 
 class TeamScore(db.Model):
-
+    team = db.ReferenceProperty(Team,collection_name='teamScores',required=True)
+    assignment = db.ReferenceProperty(Assignment,collection_name="topThree",required=True)
     teamName = db.StringProperty(required=True)
+    assignmentName = db.StringProperty(required=True)
     score = db.FloatProperty(required=True)
     comment = db.TextProperty(required=False)
     rank = db.IntegerProperty(required=False)
-
 
 def createDefaultUsers():
     """
@@ -164,16 +164,14 @@ def addStudent(paraTuple):
 
 
 def user_validation(username,password):
-    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username)
-    result = user.get()
+    user = db.GqlQuery("SELECT * FROM Users WHERE name = :1",username).get()
 
     template_values = {}
-    if result :
-        hashPassword = result.hashPassword
+    if user :
+        hashPassword = user.hashPassword
         if user_valid(username=username,password=password,hashPassword=hashPassword):
             template_values['haveUser'] = 'yes'
-            template_values['user'] = result
-            #template_values['userKey'] = user
+            template_values['user'] = user
         else:
             template_values['haveUser'] = 'no'
     else:
@@ -354,7 +352,8 @@ def createAssignment(paraDictionary):
         receivers = receivers,
         content = paraDictionary['assignmentContent'],
         deadLine = paraDictionary['deadline'],
-        pubOrTeam = paraDictionary['receiver']
+        pubOrTeam = paraDictionary['receiver'],
+        teamScores = []
     )
     new_assignment.put()
 
@@ -477,7 +476,7 @@ def createUploadWork(paraDic):
             sourceCode = paraDic['sourceCode'],
             URL = paraDic['URL'],
             filename = paraDic['filename'],
-            #score = 0,
+            coordinate = paraDic['coordinate'],
             votes = 0
         )
         new_uploadWork.put()
@@ -582,25 +581,32 @@ def teacherScore(teamID,assignmentName,teamScore,teamComment):
                 score.put()
 
     new_teamScore = TeamScore(
+        team = team,
+        assignment = assignment,
+        assignmentName = assignmentName,
         teamName = team.teamName,
         score = teamScore,
-        comment = teamComment
+        comment = teamComment,
+        rank = 0
     )
     new_teamScore.put()
-    assignment.topThree.append(team.teamName)
+    assignment.teamScores.append(team.teamName)
     assignment.put()
     sortTeamScore(assignment,new_teamScore)
 
 
 
 def sortTeamScore(assignment,teamScore):
-    topThree = assignment.topThree
-    topThree = sorted(topThree,cmp=cmpScore)
-    index = topThree.index(teamScore.teamName) + 1
-    teamScore.rank = index
-    assignment.topThree = topThree
+    teamScores = assignment.teamScores
+    teamScores = sorted(teamScores,cmp=cmpScore)
+    scores = TeamScore.all().filter('assignmentName = ',assignment.assignmentName).fetch(20)
+    for score in scores:
+        index = teamScores.index(score.teamName) + 1
+        score.rank = index
+        score.put()
+    assignment.teamScores = teamScores
     assignment.put()
-    teamScore.put()
+    #teamScore.put()
 
 
 def cmpScore(name1,name2):
@@ -613,3 +619,11 @@ def cookieUsername(user_cookie):
     uid = int(cookieDigest[0])
     user = Users.get_by_id(uid)
     return user
+
+def ifScored(teamID,assignmentName):
+    team = Team.all().filter('teamID = ',teamID).get()
+    teamScore = team.teamScores.filter('assignmentName = ',assignmentName).get()
+    if teamScore:
+        return True
+    else:
+        return False

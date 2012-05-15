@@ -2,6 +2,9 @@ __author__ = 'Steven_yang'
 
 import os
 import webapp2
+import urllib2
+from xml.dom import minidom
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.ext.blobstore import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
@@ -9,11 +12,32 @@ from google.appengine.ext.webapp import blobstore_handlers
 from dataTable import createUploadWork
 from dataTable import cookieUsername
 
+IP_URL = 'http://api.hostip.info/?ip='
+
+def getCoordinates(ip):
+    ip = '4.4.4.2'
+    url = IP_URL+ip
+    content = None
+    try:
+        content = urllib2.urlopen(url).read()
+    except urllib2.URLError:
+        return
+
+    if content:
+        parseContent = minidom.parseString(content)
+        coordinate = parseContent.getElementsByTagName('gml:coordinates')
+        if coordinate and coordinate[0].childNodes[0].nodeValue:
+            lon,lat = coordinate[0].childNodes[0].nodeValue.split(',')
+            return db.GeoPt(lat,lon)
+
+
+
 class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.render_page()
 
     def render_page(self,uploadMessage=''):
+        self.response.out.write(repr(getCoordinates(self.request.remote_addr)))
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
 
@@ -32,7 +56,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
         blob_info = upload_files[0]
-        
+
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
         assignmentName = self.request.get('assignmentName')
@@ -40,8 +64,9 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         version = self.request.get('uploadVersion')
         description = self.request.get('uploadDescription')
         URL = self.request.get('URL')
-        #sourceCode = self.get_uploads('file')
-        #bolb_info = sourceCode[0]
+        #Get the user coordinate information
+        coordinate = getCoordinates(self.request.remote_addr)
+
         paraDic = {
             'username': username,
             'assignmentName':assignmentName,
@@ -52,6 +77,10 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             'URL':URL,
             'filename':blob_info.filename
         }
+        if coordinate:
+            paraDic['coordinate'] = coordinate
+
+
         if createUploadWork(paraDic):
             self.redirect('/student')
         else:
