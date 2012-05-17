@@ -3,6 +3,10 @@ __author__ = 'Steven_yang'
 import os
 import webapp2
 import urllib2
+#import httplib2
+import random
+import time
+
 from xml.dom import minidom
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -13,11 +17,16 @@ from dataTable import createUploadWork
 from dataTable import cookieUsername
 
 IP_URL = 'http://api.hostip.info/?ip='
+WEBPAGETEST = 'http://www.webpagetest.org/runtest.php?f=xml&k=6301c5ec512b446e8c4315e9e1d6dd81&url='
+
+
+
 
 def getCoordinates(ip):
     ip = '4.4.4.2'
     url = IP_URL+ip
     content = None
+
     try:
         content = urllib2.urlopen(url).read()
     except urllib2.URLError:
@@ -30,6 +39,28 @@ def getCoordinates(ip):
             lon,lat = coordinate[0].childNodes[0].nodeValue.split(',')
             return db.GeoPt(lat,lon)
 
+def getTestURL(url):
+    request = random.randint(100,10000)
+
+    URL = WEBPAGETEST + url + '&r=' + str(request)
+    #return URL
+    content = None
+    urlRequest = urllib2.Request(URL)
+    try:
+        content = urllib2.urlopen(urlRequest)
+    except urllib2.URLError:
+        return 'noOpen'
+    content = content.read()
+    if content:
+        parseContent = minidom.parseString(content)
+        xmlResultNode = parseContent.getElementsByTagName('xmlUrl')
+        if xmlResultNode and xmlResultNode[0].childNodes[0].nodeValue:
+            getTestResult = xmlResultNode[0].childNodes[0].nodeValue + '?r=' + str(request)
+            return getTestResult
+        else:
+            return 'noNode'
+    else:
+        return 'noContent'
 
 
 class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
@@ -66,7 +97,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         URL = self.request.get('URL')
         #Get the user coordinate information
         coordinate = getCoordinates(self.request.remote_addr)
-
+        testResultURL = getTestURL(URL)
         paraDic = {
             'username': username,
             'assignmentName':assignmentName,
@@ -79,6 +110,8 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         }
         if coordinate:
             paraDic['coordinate'] = coordinate
+        #if testResultURL:
+        paraDic['testResultURL'] = testResultURL
 
 
         if createUploadWork(paraDic):

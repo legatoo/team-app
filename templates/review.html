@@ -49,6 +49,7 @@
             <td><a href="{{upload.URL}}">URL</a></td>
             <td>{{upload.description}}</td>
             <td>{{upload.filename}}</td>
+            <!--<td>{{upload.testResultURL}}</td>-->
             <td>
                 {% ifequal upload.status "active"%}
                 <form method="post" name="downloadForm">

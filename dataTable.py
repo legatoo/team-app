@@ -95,7 +95,8 @@ class UplaodWork(db.Model):
     document = blobstore.BlobReferenceProperty(required=False)
     filename = db.StringProperty(required=False)
 
-    coordinate = db.GeoPtProperty()
+    coordinate = db.GeoPtProperty(required=True)
+    testResultURL = db.StringProperty(required=True)
 
 
 
@@ -477,6 +478,7 @@ def createUploadWork(paraDic):
             URL = paraDic['URL'],
             filename = paraDic['filename'],
             coordinate = paraDic['coordinate'],
+            testResultURL = paraDic['testResultURL'],
             votes = 0
         )
         new_uploadWork.put()
