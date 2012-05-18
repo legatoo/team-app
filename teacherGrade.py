@@ -34,7 +34,7 @@ def getScreenShots(url):
             childNodes[3].childNodes[7].\
             childNodes[7].childNodes[0].nodeValue
             return imageURL
-        
+
 def returnScreenShots(screenShotList):
     imageList = []
     for item in screenShotList:

@@ -121,9 +121,9 @@ class studentHandler(webapp2.RequestHandler):
                 self.render_page(voteMessage='Thanks for voting!')
             else :
                 self.render_page(voteMessage='You can vote this work only once!')
-        if submit == 'mutualScore':
+        if submit == 'leader':
             assignmentTarget = self.request.get('assignmentTarget')
-            self.redirect('/stumutualscore?assignmentName='+assignmentTarget)
+            self.redirect('/team/leader?assignmentName='+assignmentTarget)
 
 
 app = webapp2.WSGIApplication([('/student',studentHandler)], debug=True)

@@ -67,7 +67,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.render_page()
 
-    def render_page(self,uploadMessage=''):
+    def render_page(self,uploadMessage='',error=''):
         self.response.out.write(repr(getCoordinates(self.request.remote_addr)))
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
@@ -80,13 +80,15 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         templateValues['username'] = username
         templateValues['upload_url'] = upload_url
         templateValues['uploadMessage'] = uploadMessage
+        templateValues['error'] = error
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
 
     def post(self):
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
-        blob_info = upload_files[0]
+
+
 
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
@@ -95,29 +97,41 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         version = self.request.get('uploadVersion')
         description = self.request.get('uploadDescription')
         URL = self.request.get('URL')
-        #Get the user coordinate information
-        coordinate = getCoordinates(self.request.remote_addr)
-        testResultURL = getTestURL(URL)
-        paraDic = {
-            'username': username,
-            'assignmentName':assignmentName,
-            'title':title,
-            'version':version,
-            'description':description,
-            'sourceCode':blob_info.key(),
-            'URL':URL,
-            'filename':blob_info.filename
-        }
-        if coordinate:
-            paraDic['coordinate'] = coordinate
-        #if testResultURL:
-        paraDic['testResultURL'] = testResultURL
+
+        if title and version and description and URL:
+            #Get the user coordinate information
+            coordinate = getCoordinates(self.request.remote_addr)
+            testResultURL = getTestURL(URL)
+            paraDic = {
+                'username': username,
+                'assignmentName':assignmentName,
+                'title':title,
+                'version':version,
+                'description':description,
+                #'sourceCode':blob_info.key(),
+                'URL':URL,
+                #'filename':blob_info.filename
+            }
+            if upload_files:
+                blob_info = upload_files[0]
+                paraDic['sourceCode'] = blob_info.key()
+                paraDic['filename'] = blob_info.filename
+            else:
+                paraDic['sourceCode'] = None
+                paraDic['filename'] = None
+            if coordinate:
+                paraDic['coordinate'] = coordinate
+                #if testResultURL:
+            paraDic['testResultURL'] = testResultURL
 
 
-        if createUploadWork(paraDic):
-            self.redirect('/student')
+            if createUploadWork(paraDic):
+                self.redirect('/student')
+            else:
+                self.render_page(uploadMessage='Bad luck! This assignment is expired!')
         else:
-            self.render_page(uploadMessage='Bad luck! This assignment is expired!')
+            self.render_page(error = 'No field can be empty!')
+
 
 
 

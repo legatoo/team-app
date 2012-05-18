@@ -137,10 +137,7 @@
     {% endfor%}
     <br>
     {%ifequal assignment.pubOrTeam "team"%}
-    {% if user.leader %}
-        <div>You are the leader, please confirm the team-cross-value information</div>
-        <a href="/crossvalue?teamID={{user.teamID}}&assignmentName={{assignment.assignmentName}}">Go to check</a>
-    {% endif%}
+
     <div>You have uploaded these works:</div>
     {%endifequal%}
     <br>
@@ -185,7 +182,9 @@
             <input type="hidden" name="assignmentTarget" value={{assignment.assignmentName}}>
             <input type="submit" name="submit" value="upload">
             <input type="submit" name="submit" value="download">
-            <input type="submit" name="submit" value="mutualScore">
+            {% if user.leader %}
+            <input type="submit" name="submit" value="leader">
+            {% endif%}
             </form>
         {%endifequal%}
 
@@ -208,7 +207,15 @@
             <dd>-stuff you uploaded:{% for item in score.uploadStuff%} {{item}}. {% endfor%}</dd>
             <dd>-votes: {{score.votes}}</dd>
             <dd>-person score: {{score.personScore}}</dd>
-            <dd>-teammate comments: {% for comment in score.teammateComment%} {{comment}}. {% endfor%}</dd>
+            <dd>-person rank: {{score.personRank}}</dd>
+            <dd>-teammate comments:
+                <br>
+                {% for comment in score.comments%}
+                {{comment.author}} said at {{comment.date}}:
+                {{comment.content}}
+                <br>
+                {% endfor%}
+            </dd>
             <dd>-teacher score: {{score.teamScore}}</dd>
             <dd>-teacher comment: {{score.teacherComment}}</dd>
             {% endfor%}

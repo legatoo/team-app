@@ -92,28 +92,11 @@ class UplaodWork(db.Model):
     status = db.StringProperty(required=True)
     URL = db.StringProperty(required=False)
     sourceCode = blobstore.BlobReferenceProperty(required=False)
-    document = blobstore.BlobReferenceProperty(required=False)
+    #document = blobstore.BlobReferenceProperty(required=False)
     filename = db.StringProperty(required=False)
 
     coordinate = db.GeoPtProperty(required=True)
     testResultURL = db.StringProperty(required=True)
-
-
-
-
-class Comments(db.Model):
-    users = db.ReferenceProperty(Users,collection_name="comments",required=True)
-    author = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    commentID = db.IntegerProperty(required=True)
-    date = db.DateTimeProperty(auto_now_add=True)
-    title = db.StringProperty(required=False)
-
-    #three kind of comment
-    uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
-    assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=False)
-    selfRefference = db.SelfReferenceProperty(collection_name="comments",required=False)
-
 
 class Score(db.Model):
     user = db.ReferenceProperty(Users,collection_name="scores",required=True)
@@ -125,7 +108,7 @@ class Score(db.Model):
     uploadStuff = db.StringListProperty(required=True)
     confirm = db.BooleanProperty(required=True)
     scorePeople = db.StringListProperty(required=True)
-    teammateComment = db.StringListProperty(required=True)
+    personRank = db.IntegerProperty(required=False)
     teamScore = db.FloatProperty(required=False)
     teacherComment = db.TextProperty(required=False)
 
@@ -140,6 +123,24 @@ class TeamScore(db.Model):
     score = db.FloatProperty(required=True)
     comment = db.TextProperty(required=False)
     rank = db.IntegerProperty(required=False)
+
+
+class Comments(db.Model):
+    users = db.ReferenceProperty(Users,collection_name="comments",required=True)
+    author = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    commentID = db.IntegerProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
+    title = db.StringProperty(required=False)
+
+    #three kind of comment
+    uploads = db.ReferenceProperty(UplaodWork,collection_name="comments",required=False)
+    assignments = db.ReferenceProperty(Assignment,collection_name="comments",required=False)
+    scores = db.ReferenceProperty(Score,collection_name="comments",required=False)
+    selfRefference = db.SelfReferenceProperty(collection_name="comments",required=False)
+
+
+
 
 def createDefaultUsers():
     """
@@ -420,14 +421,17 @@ def createAssignmentComment(paraDic):
 
 
 def createUploadComment(paraDic):
-    user = Users.all().filter('name = ',paraDic['username']).get()
+    commentAuthor = Users.all().filter('name = ',paraDic['username']).get()
+    commentTarget = Users.all().filter('name = ',paraDic['uploads'].author).get()
+    score = commentTarget.scores.filter('assignmentName = ',paraDic['uploads'].assignmentName).get()
     new_comment = Comments(
-        users = user,
-        author = user.name,
+        users = commentAuthor,
+        author = commentAuthor.name,
         commentID = random.randrange(100001),
         content = paraDic['content'],
         title = paraDic['title'],
         uploads = paraDic['uploads'],
+        scores = score
 
     )
     new_comment.put()
@@ -549,27 +553,25 @@ def createScore(user,assignment,team):
             personScore = 0.0,
             uploadStuff = [],
             scorePeople = [],
-            teammateComment = [],
+            personRank = None,
             confirm = False
         )
         new_score.put()
         return new_score
 
-def scoreMem(scorer,scoreTarget,scoreNumber,comment):
-    score = Score.all().filter('scoreID = ',scoreTarget).get()
-    if scorer in score.scorePeople:
+def scoreMem(scorer,scoreTarget,scoreNumber):
+    #score = Score.all().filter('scoreID = ',scoreTarget).get()
+    if scorer in scoreTarget.scorePeople:
         return 'scored'
     else:
-        score.scorePeople.append(scorer)
-        if score.personScore == 0:
-            score.personScore += scoreNumber
+        scoreTarget.scorePeople.append(scorer)
+        if scoreTarget.personScore == 0:
+            scoreTarget.personScore += scoreNumber
         else:
-            score.personScore += scoreNumber
-            score.personScore = score.personScore/2
-        finalComment = scorer+': '+comment+' '
-        score.teammateComment.append(finalComment)
+            scoreTarget.personScore += scoreNumber
+            scoreTarget.personScore = scoreTarget.personScore/2
 
-        score.put()
+        scoreTarget.put()
         return 'success'
 
 def teacherScore(teamID,assignmentName,teamScore,teamComment):

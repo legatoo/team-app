@@ -53,8 +53,8 @@ handlers:
 - url: /teamworkcomments
   script: teamworkComments.app
 
-- url: /stumutualscore
-  script: score.app
+- url: /team/leader
+  script: team.app
 
 - url: /addstudent
   script: addStudent.app

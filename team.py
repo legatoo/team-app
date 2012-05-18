@@ -42,6 +42,46 @@ class teamHandler(blobstore_handlers.BlobstoreDownloadHandler):
 
 
 
+class leaderHandler(webapp2.RequestHandler):
+    def get(self):
+        self.render_page()
+
+    def render_page(self,message=''):
+        form = os.path.join(os.path.dirname(__file__),'templates/leader.html')
+        templateValue = {}
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        assignmentName = self.request.get('assignmentName')
+        leader = Users.all().filter('name = ',username).get()
+        team = Team.all().filter('teamID = ',leader.teamID).get()
+        scores = team.scores.filter('assignmentName = ',assignmentName).order('-personScore')
+
+        templateValue['scores'] = scores
+        templateValue['username'] = username
+
+        renderPage = template.render(form,templateValue)
+        self.response.out.write(renderPage)
+
+    def post(self):
+        submit = self.request.get('submit')
+        if submit == 'confirm':
+            user_cookie = self.request.cookies.get('user')
+            username = cookieUsername(user_cookie).name
+            assignmentName = self.request.get('assignmentName')
+            user = Users.all().filter('name = ',username).get()
+            team = Team.all().filter('teamID = ',user.teamID).get()
+            memberScores = team.scores.filter('assignmentName = ',assignmentName).order('-personScore')
+            #count = memberScores.count(1)
+            rank = 1
+            for memberScore in memberScores:
+                memberScore.confirm = True
+                memberScore.personRank = rank
+                rank += 1
+                memberScore.put()
+            self.render_page(message='Confirm successfully!')
 
 
-app = webapp2.WSGIApplication([('/team',teamHandler) ],debug=True)
+
+
+app = webapp2.WSGIApplication([('/team',teamHandler),
+                               ('/team/leader',leaderHandler)],debug=True)

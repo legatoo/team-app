@@ -28,13 +28,18 @@
 
         <input type="submit" name="submit" value="Download">
         <hr>
-
+        <div>Give this product a score:</div>
+        <input type="text" name="score" >
+        <input type="hidden" name="uploadID" value={{work.uploadUD}}>
+        <input type="submit" name="submit" value="score">
+        <div>{{error}}{{message}}</div>
         <div>Add a comment:</div>
         <div>Title: <input type="text" name="title"></div>
         <div>Comment:</div>
         <br>
         <textarea rows="5" cols="50" name="content"></textarea>
         <br>
+
         <input type="submit" name="submit" value="Comment">
         <hr>
 

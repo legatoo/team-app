@@ -138,6 +138,7 @@
             <th>Upload Stuff</th>
             <th>Votes</th>
             <th>Person Score</th>
+            <th>Person Rank</th>
             <th>Teammate Comment</th>
             <th>Final Score</th>
             <th>Teacher Comment</th>
@@ -152,10 +153,17 @@
 
             {% for score in teamMember.scores%}
             {% ifequal score.assignmentName assignmentName%}
-            <td>{% for item in score.uploadStuff%} {{item}}. {% endfor%}</td>
+            <td>{% for item in score.uploadStuff%} {{item}} {% endfor%}</td>
             <td>{{score.votes}}</td>
+            {% if score.confirm%}
             <td>{{score.personScore}}</td>
-            <td>{% for comment in score.teammateComment%} {{comment}} {% endfor%}</td>
+            <td>{{score.personRank}}</td>
+            {% else%}
+            <td>Waiting for team leader confirm</td>
+            <td>Waiting for team leader confirm</td>
+            {% endif%}
+
+            <td>{% for comment in score.comments%} {{comment.author}} said: {{comment.content}} {% endfor%}</td>
             <td>{{score.teamScore}}</td>
             <td>{{score.teacherComment}}</td>
             {% endifequal%}
