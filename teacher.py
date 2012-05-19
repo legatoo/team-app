@@ -8,6 +8,7 @@ import  webapp2
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from dataTable import Users
+from dataTable import Team
 from dataTable import Assignment
 from dataTable import query_students
 from dataTable import delete_student
@@ -24,6 +25,28 @@ from dataTable import cookieUsername
 def tagDigest(tags):
     tagList = tags.split(';')
     return tagList
+
+def returnCSV():
+    students = Users.all()
+
+    cvs = "Name,Team,Role,Assignment,PersonScore,PersonRank,Votes,TeamScore,TeamRank\n"
+    for student in students:
+        teamName = None
+        team = Team.all().filter('teamID = ',student.teamID).get()
+        if team:
+            teamName = team.teamName
+        for score in student.scores:
+            if score:
+                cvs += str(student.name)+','
+                cvs += str(teamName)+','
+                cvs += str(student.teamRole)+','
+                cvs += str(score.assignmentName)+','
+                cvs += str(score.personScore)+','
+                cvs += str(score.personRank)+','
+                cvs += str(score.votes)+','
+                cvs += str(score.teamScore)+','
+                cvs += str(score.teamRank)+'\n'
+    return cvs
 
 class teacherHanlder(webapp2.RequestHandler):
     def render_page(self,editMessage = '',message=''):
@@ -191,9 +214,23 @@ class editAssignmentHandler(webapp2.RequestHandler):
             updateAssignment(assignmentName,deadLine,assignmentContent)
             self.redirect('/teacher')
 
+class csvHandler(webapp2.RequestHandler):
+    def get(self):
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
 
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        user = Users.all().filter('name = ',username).get()
+        if user.role == 'teacher':
+            csvFormatScore = returnCSV()
+            self.response.headers.add_header(str('Content-Disposition'), str('attachment;filename='+username+'.csv'))
+            self.response.out.write(csvFormatScore)
+        else:
+            self.response.out.write('Permission denied!')
 
 
 app = webapp2.WSGIApplication([('/teacher',teacherHanlder),
                                ('/releaseassignment',releaseAssignmentHandler),
-                               ('/editassignment',editAssignmentHandler)],debug=True)
+                               ('/editassignment',editAssignmentHandler),
+                               ('/teacher.csv',csvHandler)],debug=True)

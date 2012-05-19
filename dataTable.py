@@ -110,6 +110,7 @@ class Score(db.Model):
     scorePeople = db.StringListProperty(required=True)
     personRank = db.IntegerProperty(required=False)
     teamScore = db.FloatProperty(required=False)
+    teamRank = db.IntegerProperty(required=False)
     teacherComment = db.TextProperty(required=False)
 
     assignment = db.ReferenceProperty(Assignment,collection_name="scores",required=False)
@@ -554,6 +555,7 @@ def createScore(user,assignment,team):
             uploadStuff = [],
             scorePeople = [],
             personRank = None,
+            teamRank = None,
             confirm = False
         )
         new_score.put()
@@ -572,17 +574,25 @@ def scoreMem(scorer,scoreTarget,scoreNumber):
             scoreTarget.personScore = scoreTarget.personScore/2
 
         scoreTarget.put()
-        return 'success'
+
+    user = Users.all().filter('name = ',scorer).get()
+    team = Team.all().filter('teamID = ',user.teamID).get()
+    scoreList = []
+    for stu in team.teamMembers:
+        if stu.scores:
+            for score in stu.scores:
+                if score.assignmentName == scoreTarget.assignmentName:
+                    scoreList.append(score)
+    scoreList = sorted(scoreList,cmp=cmpPersonScore)
+    for score in scoreList:
+        index = scoreList.index(score)+1
+        score.personRank = index
+        score.put()
+    return 'success'
 
 def teacherScore(teamID,assignmentName,teamScore,teamComment):
     team = Team.all().filter('teamID = ',teamID).get()
     assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
-    for user in team.teamMembers:
-        for score in user.scores:
-            if score.assignmentName == assignmentName:
-                score.teacherComment = teamComment
-                score.teamScore = teamScore
-                score.put()
 
     new_teamScore = TeamScore(
         team = team,
@@ -599,10 +609,25 @@ def teacherScore(teamID,assignmentName,teamScore,teamComment):
     sortTeamScore(assignment,new_teamScore)
 
 
+    teamScores = TeamScore.all().filter('assignmentName = ',assignmentName)
+    teams = Team.all()
+    for t in teams:
+        ts = t.teamScores.filter('assignmentName = ',assignmentName).get()
+        if ts:
+            for user in t.teamMembers:
+                for score in user.scores:
+                    if score.assignmentName == assignmentName:
+                        score.teacherComment = teamComment
+                        score.teamScore = teamScore
+                        score.teamRank = ts.rank
+                        score.put()
+
+
+
 
 def sortTeamScore(assignment,teamScore):
     teamScores = assignment.teamScores
-    teamScores = sorted(teamScores,cmp=cmpScore)
+    teamScores = sorted(teamScores,cmp=cmpTeamScore)
     scores = TeamScore.all().filter('assignmentName = ',assignment.assignmentName).fetch(20)
     for score in scores:
         index = teamScores.index(score.teamName) + 1
@@ -612,8 +637,10 @@ def sortTeamScore(assignment,teamScore):
     assignment.put()
     #teamScore.put()
 
+def cmpPersonScore(score1,score2):
+    return int(score2.personScore - score1.personScore)
 
-def cmpScore(name1,name2):
+def cmpTeamScore(name1,name2):
     entity1 = TeamScore.all().filter('teamName = ',name1).get()
     entity2 = TeamScore.all().filter('teamName = ',name2).get()
     return int(entity2.score - entity1.score)

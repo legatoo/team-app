@@ -1,6 +1,9 @@
 __author__ = 'Steven_yang'
 
 import os
+import json
+import csv
+
 
 import webapp2
 from google.appengine.ext import db
@@ -27,9 +30,26 @@ def findTop3(assignments):
         if assignment.topThree:
             top3 = assignment.topThree.order('-score').fetch(3)
             topThree.append((assignment.assignmentName,top3))
-            return topThree
-        else:
-            return None
+    return topThree
+
+
+def returnCSV(user):
+    scores = user.scores
+    teamName = Team.all().filter('teamID = ',user.teamID).get().teamName
+    cvs = ""
+    if scores:
+        cvs = "Name,Team,Role,Assignment,PersonScore,PersonRank,Votes,TeamScore,TeamRank\n"
+        for score in scores:
+            cvs += str(user.name)+','
+            csv += str(teamName)+','
+            csv += str(user.teamRole)+','
+            cvs += str(score.assignmentName)+','
+            cvs += str(score.personScore)+','
+            cvs += str(score.personRank)+','
+            cvs += str(score.votes)+','
+            cvs += str(score.teamScore)+','
+            cvs += str(score.teamRank)+'\n'
+        return cvs
 
 class studentHandler(webapp2.RequestHandler):
 
@@ -124,6 +144,21 @@ class studentHandler(webapp2.RequestHandler):
         if submit == 'leader':
             assignmentTarget = self.request.get('assignmentTarget')
             self.redirect('/team/leader?assignmentName='+assignmentTarget)
+        if submit == 'export':
+            self.redirect('/student.json')
 
 
-app = webapp2.WSGIApplication([('/student',studentHandler)], debug=True)
+class csvHandler(webapp2.RequestHandler):
+    def get(self):
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        self.response.headers.add_header(str('Content-Disposition'), str('attachment;filename='+username+'.csv'))
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        user = Users.all().filter('name = ',username).get()
+        csvFormatScore = returnCSV(user)
+        self.response.out.write(csvFormatScore)
+
+
+app = webapp2.WSGIApplication([('/student',studentHandler),
+                               ('/student.csv',csvHandler)], debug=True)

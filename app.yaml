@@ -20,7 +20,13 @@ handlers:
 - url: /student
   script: student.app
 
+- url: /student.csv
+  script: student.app
+
 - url: /teacher
+  script: teacher.app
+
+- url: /teacher.csv
   script: teacher.app
 
 - url: /teacher/review
