@@ -206,8 +206,7 @@
 
                         {% if comment.comments %}
                         {% for item in comment.comments %}
-                        <div><b>{{item.author}}</b></div>
-                        <div>{{item.date}}</div>
+                        <div><b>{{item.author}}</b> reply at {{item.date}}</div>
                         <pre>{{item.content}}</pre>
 
                         {% endfor%}

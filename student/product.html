@@ -80,12 +80,16 @@
         <div class="container_12">
             <div class="grid_12">
                 <div >
-                <h1>Your team has these product</h1>
+                <h1>Your products collection.</h1>
                 </div>
                 <div class="pad-0 border-1">
                     <br>
                     {% if assignments %}
                     {% for assignment in assignments%}
+                    {% ifequal assignment.pubOrTeam "team"%}
+
+                    <!-- has team-->
+                    {%if user.hasTeam%}
                     <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}">
                         Assignment name:  {{assignment.assignmentName}}</a>
                     </div>
@@ -113,8 +117,13 @@
 
                     {% endifequal%}
                     {%endfor%}
+                    {%endif%}
+
+
+                    {%endifequal%}
                     {%endfor%}
-                    {% endif%}
+
+                    {%endif%}
                     <div><b>{{voteMessage}}</b></div>
                 </div>
             </div>

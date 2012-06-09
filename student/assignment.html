@@ -80,13 +80,15 @@
         <div class="container_12">
             <div class="grid_12">
                 <div class="pad-0 border-1">
-                    {%if user.hasTeam%}
+
 
                     {%if assignments%}
                     <h3>All Assignments</h3>
                     {%for assignment in assignments%}
+                    {% ifequal assignment.pubOrTeam "team"%}
 
-
+                    <!-- has team-->
+                    {%if user.hasTeam%}
 
                     <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}">
                         Assignment name:  {{assignment.assignmentName}}</a>
@@ -122,13 +124,50 @@
                     <a href="/student/upload?assignmentName={{assignment.assignmentName}}" class="button">Upload Work</a>
                     <a href="/assignmentwall?assignmentName={{assignment.assignmentName}}" class="button">Discussion</a>
                     <hr>
+                    {%endif%}
+
+                    {%else%}
+
+                    <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}">
+                        Assignment name:  {{assignment.assignmentName}}</a>
+                    </div>
+                    {% if topThree%}
+                    <div>
+                        <a href="/student/topwork?assignmentName={{assignment.assignmentName}}" class="button">Top-3</a>
+                    </div>
+                    {% for top in topThree%}
+                    {% ifequal top.0 assignment.assignmentName%}
+                    {% for item in top.1%}
+                    <div>.................Rank: {{item.rank}}.....................</div>
+                    <div>Team name: {{item.teamName}}</div>
+                    <div>Score: {{item.score}}</div>
+                    <div>Comment: {{item.comment}}</div>
+                    <div>......................................................</div>
+                    {% endfor%}
+                    {% endifequal%}
+
+                    {% endfor%}
+                    {% endif%}
+                    <br>
+                    <div>Release time:  {{assignment.releaseTime}}</div>
+                    <div>Due Date:  {{assignment.deadLine}}</div>
+                    <div>Receivers: {{assignment.pubOrTeam}}
+                        <div>Tags:</div>
+
+                         {% for tag in assignment.tags%}
+                        <div><a href="/tagcollection?tagName={{tag.tags.tagName}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
+                         {% endfor%}
+                    </div>
+
+                    <!--<a href="/student/upload?assignmentName={{assignment.assignmentName}}" class="button">Upload Work</a>-->
+                    <a href="/assignmentwall?assignmentName={{assignment.assignmentName}}" class="button">Discussion</a>
+                    <hr>
+                    {%endifequal%}
                     {%endfor%}
 
                 </div>
-
-
                 {%endif%}
-                {%endif%}
+
 
             </div>
             <div class="wrap block-1 pad-1">
