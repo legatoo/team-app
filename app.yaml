@@ -24,6 +24,9 @@ handlers:
 - url: /login
   script: login.app
 
+- url: /introduction
+  script: introduction.app
+
 - url: /student/home
   script: student.app
 
