@@ -60,6 +60,7 @@
                 <form method="post">
                     {% if assignments %}
                     {% for assignment in assignments%}
+                    {%ifequal assignment.pubOrTeam "team"%}
                     <div><b>Assignment name: {{assignment.assignmentName}}</b></div>
                     <div><b>Assignment author: {{assignment.author}}</b></div>
                     <div><b>Assignment deadline: {{assignment.deadLine}}</b></div>
@@ -92,11 +93,12 @@
                     {%endifequal%}
                    {% endifequal%}
                    {% endfor%}
-                    <div>------------------------------------------------------------------</div>
+                    <div>-----------------------------------------------------------------------------------</div>
                    {% endfor%}
 
                     <hr>
 
+                    {%endifequal%}
                     {%endfor%}
                     {%endif%}
                     <div><b>{{message}}</b></div>
