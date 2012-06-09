@@ -215,12 +215,7 @@ def query_students():
     else:
         return None
 
-def query_teams():
-    """
-    return all teams
-    """
-    teams = Team.all().fetch(15)
-    return teams
+
 
 def query_assigments():
     """
@@ -256,11 +251,13 @@ def quitTeam(username):
     user = Users.all().filter('name = ',username).get()
     team = Team.all().filter('teamID = ',user.teamID).get()
     scores = Score.all().filter('username = ',user.name)
-    for score in scores:
-        score.delete()
+
     if team and team.lock == True:
         return 'lock'
     elif  team and user:
+        for score in scores:
+            score.delete()
+
         if len(team.teamMember) == 1:
             team.delete()
             user.hasTeam = False
@@ -532,8 +529,8 @@ def teamAssignmentsCollection(username,assignmentName):
     uploads = team.works.filter('assignmentName = ',assignmentName).fetch(20)
     return (uploads,assignment)
 
-def queryStudentWorks(assignmentName):
-    assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+def queryStudentWorks():
+    assignment = Assignment.all().fetch(20)
     teams = Team.all().fetch(20)
     #works = assignment.works.order('-date').fetch(100)
     return (teams,assignment)

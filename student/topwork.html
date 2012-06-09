@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Team</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/reset.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/grid_12.css">
+    <link href='http://fonts.googleapis.com/css?family=Condiment' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
+    <script src="/js/jquery-1.7.2.min.js"></script>
+    <script src="/js/jquery.easing.1.3.js"></script>
+    <!--[if lt IE 8]>
+    <div style=' clear: both; text-align:center; position: relative;'>
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+            <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
+        </a>
+    </div>
+    <![endif]-->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/js/html5.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/ie.css">
+    <![endif]-->
+</head>
+<body>
+<div class="main">
+    <!--==============================header=================================-->
+    <header>
+        <div id = "logo"><a href="index.html"><img src="/images/logo3.png" alt=""></a></div>
+        <div id = "welcom">Welcome {{user.name}}!</div>
+        <div ><a href = "/login" >Sign Out</a></div>
+        <div class="clear"></div>
+        <nav class="box-shadow">
+            <div>
+                <ul class="menu">
+                    <li class="home-page current"><a href="/student/home"><span></span></a></li>
+                    <li><a href="/student/team">Team</a></li>
+                    <li><a href="/student/assignment">Assignments</a></li>
+                    <li><a href="/student/product">Products</a></li>
+                    <li><a href="/student/myscore">My Score</a></li>
+                    {%if user.leader%}
+                    <li><a href="/student/leadership">LeaderShip</a></li>
+                    {% endif%}
+
+                </ul>
+                <div class="clear"></div>
+            </div>
+        </nav>
+    </header>
+    <!--==============================content================================-->
+    <section id="content"><div class="ic"></div>
+        <div class="container_12">
+            <div class="grid_12">
+                <h2>Top works collection for {{assignment.assignmentName}}.</h2>
+                <div class="wrap block-3 pad-2">
+                    {%if assignment%}
+                    <div>
+                        <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}&username={{username}}">
+                            Assignment name: {{assignment.assignmentName}} </a>
+                        </div>
+                        <div>Release time:  {{assignment.releaseTime}}</div>
+                        <div>Due Date:  {{assignment.deadLine}}</div>
+                        <div>Receivers: {{assignment.pubOrTeam}}
+                            <div>Tags:</div>
+
+                             {% for tag in assignment.tags%}
+                            <div><a href="/tagcollection?tagName={{tag.tags.tagName}}&username={{username}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
+                             {% endfor%}
+                        </div>
+
+                    {%endif%}
+                    <hr>
+                    {%if top3%}
+                    {%for top in top3%}
+
+                        <div>Rank : {{top.rank}}</div>
+                        <div>Team name : {{top.teamName}}</div>
+                        <div>Score: {{top.score}}</div>
+                        <div>Teacher comment :</div>
+                        <div>{{top.comment}}</div>
+                        <div>---------------------------------------</div>
+
+                    {%endfor%}
+                    {%endif%}
+                    <hr>
+                        <div><b>You can download their work now!</b></div>
+                    <form method="post">
+
+                        {% for item in topworks%}
+                        <div>
+                            <div>Rank : {{item.0}}</div>
+                            {%for upload in item.1%}
+                            {% ifequal upload.status "active"%}
+                            <div>{{upload.filename}}</div>
+                            <div>
+                            <form method="post">
+                                <input type="hidden" name="downloadTarget" value={{upload.uploadID}}>
+                                <input type="image" src="/images/download.png" width="50" height="25"  name="submit" value="Download" ALT="Download">
+                            </form>
+                            </div>
+                            {%endifequal%}
+                            {%endfor%}
+                        </div>
+
+                        {%endfor%}
+                    </form>
+                    </div>
+
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+    </section>
+</div>
+<!--==============================footer=================================-->
+<footer>
+    <p>System Analysis & Design Project:  <a href="http://my.ss.sysu.edu.cn/wiki/display/sad/Semester+Project+-+MyHomework" target="_blank">MyHomework</a>
+    <p>by Group :kaiShuiPaoFan</p>
+</footer>
+</body>
+</html>

@@ -28,7 +28,7 @@ class loginHandler(webapp2.RequestHandler):
     user login handler
     """
     def render_page(self, username='',haveUser='yes', errors=None):
-        form = os.path.join(os.path.dirname(__file__),'templates/login.html')
+        form = os.path.join(os.path.dirname(__file__),'templates/login_blue.html')
         template_values = {}
         if haveUser == 'no':
             template_values['haveUser'] = haveUser
@@ -68,9 +68,9 @@ class loginHandler(webapp2.RequestHandler):
                 self.response.headers.add_header('Set-Cookie', 'user=%s' % cookie)
 
                 if templateValues['user'].role == 'teacher':
-                    self.redirect('/teacher')
+                    self.redirect('/teacher/home')
                 if templateValues['user'].role == 'student':
-                    self.redirect('/student')
+                    self.redirect('/student/home')
 
             if templateValues['haveUser'] == 'no':
                 self.render_page(haveUser='no')

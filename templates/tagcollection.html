@@ -1,26 +1,182 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-    <head>
-        <title>Tag Collection</title>
-    </head>
-    <body>
-        <h1>Tag Collection</h1>
-        {% if tag%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/reset.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/grid_12.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/slider.css">
+    <link href='http://fonts.googleapis.com/css?family=Condiment' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
+    <script src="/js/jquery-1.7.2.min.js"></script>
+    <script src="/js/jquery.easing.1.3.js"></script>
+    <script src="/js/tms-0.4.x.js"></script>
 
-        <h1>Tag: {{tag.tagName}}</h1>
-        <h2>Tag Heat:{{tag.tagAmount}}</h2>
-        {% for assignment in tag.assignments%}
-        <a href="/assignmentwall?assignmentName={{assignment.assignments.assignmentName}}">
-            {{assignment.assignments.assignmentName}}
+    <link type="text/css" href="/css/ui-lightness/jquery-ui-1.8.20.custom.css" rel="stylesheet" />
+
+
+    <script src="/js/jquery.bgiframe-2.1.3.js"></script>
+    <script src="/js/jquery-ui-1.8.20.custom.min.js"></script>
+
+    <style>
+        body { font-size: 62.5%; }
+        label, input { display:block; }
+        input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        div#users-contain { width: 350px; margin: 20px 0; }
+        div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+        div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+    </style>
+    <script>
+        $(function() {
+            // a workaround for a flaw in the demo system (http://dev.jqueryui.com/ticket/4375), ignore!
+            $( "#dialog:ui-dialog" ).dialog( "destroy" );
+
+            var title = $( "#title" ),
+                    commentContent = $( "#commentContent" );
+
+
+            allFields = $( [] ).add( title ).add( commentContent);
+
+
+            $( "#dialog-form" ).dialog({
+                autoOpen: false,
+                height: 300,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Create a comment": function() {
+
+                        $("#createForm").submit();
+                        $( this ).dialog( "close" );
+
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                close: function() {
+                    allFields.val( "" ).removeClass( "ui-state-error" );
+                }
+            });
+
+            $( "#create-comment" )
+                    .button()
+                    .click(function() {
+                        $( "#dialog-form" ).dialog( "open" );
+                    });
+
+        });
+
+        $(document).ready(function(){
+            $('.slider')._TMS({
+                show:0,
+                pauseOnHover:true,
+                prevBu:false,
+                nextBu:false,
+                playBu:false,
+                duration:1000,
+                preset:'fade',
+                pagination:true,
+                pagNums:false,
+                slideshow:7000,
+                numStatus:true,
+                banners:'fromRight',
+                waitBannerAnimation:false,
+                progressBar:false
+            })
+        });
+    </script>
+
+    <!--[if lt IE 8]>
+    <div style=' clear: both; text-align:center; position: relative;'>
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+            <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
         </a>
-        <div>Author: {{assignment.assignments.author}}</div>
-        <div>Receiver: {{assignment.assignments.pubOrTeam}}</div>
-        <div>Release time: {{assignment.assignments.deadLine}}</div>
-        <hr>
-        {% endfor%}
-        {% endif%}
+    </div>
+    <![endif]-->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/js/html5.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/ie.css">
+    <![endif]-->
+</head>
+<body>
+<div class="main">
+    <!--==============================header=================================-->
+    <header>
+        <div id = "logo"><a href="index.html"><img src="/images/logo3.png" alt=""></a></div>
+        <div id = "welcom">Welcome {{user.name}}!</div>
+        <div ><a href = "/login" >Sign Out</a></div>
+        <div class="clear"></div>
+        <nav class="box-shadow">
+            <div>
+                <ul class="menu">
+                    {% ifequal user.role "teacher"%}
+                    <li class="home-page current"><a href="/teacher/home"><span></span></a></li>
+                    <li><a href="/teacher/team">Team</a></li>
+                    <li><a href="/teacher/assignment">Assignments</a></li>
+                    <li><a href="/teacher/students">Students</a></li>
+                    <li><a href="/teacher/review">Review</a></li>
+                    {%else%}
+                    <li class="home-page current"><a href="/student/home"><span></span></a></li>
+                    <li><a href="/student/team">Team</a></li>
+                    <li><a href="/student/assignment">Assignments</a></li>
+                    <li><a href="/student/product">Products</a></li>
+                    <li><a href="/student/myscore">My Score</a></li>
+                    {%if user.leader%}
+                    <li><a href="/student/leadership">LeaderShip</a></li>
+                    {% endif%}
+                    {%endifequal%}
 
-    </body>
-    <a href="/login">Sign out</a>
+
+                </ul>
+                <div class="clear"></div>
+            </div>
+        </nav>
+    </header>
+    <!--==============================content================================-->
+    <section id="content"><div class="ic"></div>
+        <div class="container_12">
+            <div class="grid_12">
+                <h1>Tag {{tag.tagName}} Collection</h1>
+
+
+
+                    {% if tag%}
+
+                    <div>Tag: {{tag.tagName}}</div>
+                    <div>Tag Heat:{{tag.tagAmount}}</div>
+                    {% for assignment in tag.assignments%}
+                    <a href="/assignmentwall?assignmentName={{assignment.assignments.assignmentName}}">
+                        {{assignment.assignments.assignmentName}}
+                    </a>
+                    <div>Author: {{assignment.assignments.author}}</div>
+                    <div>Receiver: {{assignment.assignments.pubOrTeam}}</div>
+                    <div>Release time: {{assignment.assignments.deadLine}}</div>
+                    <hr>
+                    {% endfor%}
+                    {% endif%}
+
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="aside">
+            <div class="container_12">
+                <div class="grid_12">
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </section>
+</div>
+<!--==============================footer=================================-->
+<footer>
+    <p>System Analysis & Design Project:  <a href="http://my.ss.sysu.edu.cn/wiki/display/sad/Semester+Project+-+MyHomework" target="_blank">MyHomework</a>
+    <p>by Group :KaiShuiPaoFan</p>
+</footer>
+</body>
 </html>

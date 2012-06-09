@@ -5,11 +5,18 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
 - url: /js
   static_dir: js
 
 - url: /css
   static_dir: css
+
+- url: /images
+  static_dir: images
 
 - url: /
   script: login.app
@@ -17,20 +24,65 @@ handlers:
 - url: /login
   script: login.app
 
-- url: /student
+- url: /student/home
+  script: student.app
+
+- url: /student/team
+  script: student.app
+
+- url: /student/createteam
+  script: student.app
+
+- url: /student/assignment
+  script: student.app
+
+- url: /student/upload
+  script: upload.app
+
+- url: /student/product
+  script: student.app
+
+- url: /student/download
+  script: team.app
+
+- url: /student/myscore
+  script: student.app
+
+- url: /student/teamworkcomments
+  script: teamworkComments.app
+
+- url: /student/leadership
+  script: team.app
+
+- url: /student/topwork
   script: student.app
 
 - url: /student.csv
   script: student.app
 
-- url: /teacher
+- url: /teacher/home
   script: teacher.app
 
-- url: /teacher.csv
+- url: /teacher/team
+  script: teacher.app
+
+- url: /teacher/students
+  script: teacher.app
+
+- url: /teacher/releaseassignment
+  script: teacher.app
+
+- url: /teacher/assignment
   script: teacher.app
 
 - url: /teacher/review
-  script: review.app
+  script: teacher.app
+
+- url: /teacher/grade
+  script: teacherGrade.app
+
+- url: /teacher.csv
+  script: teacher.app
 
 - url: /releaseassignment
   script: teacher.app
@@ -56,8 +108,7 @@ handlers:
 - url: /team
   script: team.app
 
-- url: /teamworkcomments
-  script: teamworkComments.app
+
 
 - url: /team/leader
   script: team.app

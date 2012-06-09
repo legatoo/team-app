@@ -15,6 +15,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from dataTable import createUploadWork
 from dataTable import cookieUsername
+from dataTable import Users
 
 IP_URL = 'http://api.hostip.info/?ip='
 WEBPAGETEST = 'http://www.webpagetest.org/runtest.php?f=xml&k=6301c5ec512b446e8c4315e9e1d6dd81&url='
@@ -63,7 +64,7 @@ def getTestURL(url):
         return 'noContent'
 
 
-class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+class studentUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.render_page()
 
@@ -71,13 +72,12 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         self.response.out.write(repr(getCoordinates(self.request.remote_addr)))
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
-
+        user = Users.all().filter('name = ',username).get()
         assignmentName = self.request.get('assignmentName')
-        upload_url = blobstore.create_upload_url('/upload?assignmentName='+assignmentName+'&username='+username)
-        form = os.path.join(os.path.dirname(__file__),'templates/upload.html')
+        upload_url = blobstore.create_upload_url('/student/upload?assignmentName='+assignmentName+'&username='+username)
+        form = os.path.join(os.path.dirname(__file__),'student/upload.html')
         templateValues = {}
-        username = self.request.get('username')
-        templateValues['username'] = username
+        templateValues['user'] = user
         templateValues['upload_url'] = upload_url
         templateValues['uploadMessage'] = uploadMessage
         templateValues['error'] = error
@@ -87,8 +87,6 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
     def post(self):
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
-
-
 
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
@@ -126,7 +124,7 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 
             if createUploadWork(paraDic):
-                self.redirect('/student')
+                self.redirect('/student/assignment')
             else:
                 self.render_page(uploadMessage='Bad luck! This assignment is expired!')
         else:
@@ -135,4 +133,4 @@ class uploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 
 
-app = webapp2.WSGIApplication([('/upload',uploadHandler)],debug=True)
+app = webapp2.WSGIApplication([('/student/upload',studentUploadHandler)],debug=True)

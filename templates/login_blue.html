@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Login --KaiShuiPaoFan</title>
+
+<link href="/css/login-box.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="/css/login-box.css" />
+</head>
+
+<body>
+
+
+<div style="padding: 150px 0 0 600px;">
+
+
+<div id="login-box">
+
+<H2>Login</H2>
+
+<br />
+<br />
+    <form method="post">
+<div id="login-box-name" style="margin-top:20px;">User name:</div><div id="login-box-field" style="margin-top:20px;"><input name="username" class="form-login" title="Username" value="" size="30" maxlength="2048" /></div>
+    <div class="error"><b>{{usernameError}}</b></div>
+<div id="login-box-name">Password:</div><div id="login-box-field"><input name="password" type="password" class="form-login" title="Password" value="" size="30" maxlength="2048" /></div>
+    <div class="error"><b>{{passwordError}}</b></div>
+    <br />
+
+    {% ifequal haveUser "no"%}
+    <div class="error"><b>No such user! return to login again! OR you can sign up a account.</b></div>
+    <br>
+    <a href="signup">sign up</a>
+    {% endifequal %}
+<br />
+<br />
+        <input type="image" src="/images/login-btn.png" width="103" height="42" style="margin-left:90px;" ALT="Login">
+
+
+    </form>
+
+
+
+
+</div>
+
+</div>
+
+
+</body>
+</html>

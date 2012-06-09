@@ -1,75 +1,287 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-    <head>
-        <title></title>
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/reset.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/grid_12.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/slider.css">
+    <link href='http://fonts.googleapis.com/css?family=Condiment' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
 
-    {{error}}
-    <form method="post">
-        {% if assignment%}
-        <h1>{{assignment.assignmentName}}</h1>
-        {% for tag in assignment.tags%}
-        <div><a href="/tagcollection?tagName={{tag.tags.tagName}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
-        {% endfor%}
-        <div>Author: {{assignment.author}}</div>
-        <div>Release time: {{assignment.releaseTime}}</div>
-        <div>Due date: {{assignment.deadLine}}</div>
-        {%endif%}
-        <hr>
-        {% if work%}
-        <div>Your teammate {{work.author}} uploaded this homework</div>
-        <div>Title: {{work.title}}</div>
-        <div>Version: {{work.version}}</div>
-        <div>Date: {{work.date}}</div>
-        <div>Votes: {{work.votes}}</div>
-        <div>You can download the source files:</div>
+    <script src="/js/jquery-1.7.min.js"></script>
+    <script src="/js/jquery.easing.1.3.js"></script>
+    <script src="/js/tms-0.4.x.js"></script>
+    <link type="text/css" href="/css/ui-lightness/jquery-ui-1.8.20.custom.css" rel="stylesheet" />
 
-        <input type="submit" name="submit" value="Download">
-        <hr>
-        <div>Give this product a score:</div>
-        <input type="text" name="score" >
-        <input type="hidden" name="uploadID" value={{work.uploadUD}}>
-        <input type="submit" name="submit" value="score">
-        <div>{{error}}{{message}}</div>
-        <div>Add a comment:</div>
-        <div>Title: <input type="text" name="title"></div>
-        <div>Comment:</div>
-        <br>
-        <textarea rows="5" cols="50" name="content"></textarea>
-        <br>
+    <script src="/js/jquery-1.7.2.min.js"></script>
+    <script src="/js/jquery.bgiframe-2.1.3.js"></script>
+    <script src="/js/jquery-ui-1.8.20.custom.min.js"></script>
 
-        <input type="submit" name="submit" value="Comment">
-        <hr>
+    <style>
+        body { font-size: 62.5%; }
+        label, input { display:block; }
+        input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        div#users-contain { width: 350px; margin: 20px 0; }
+        div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+        div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+    </style>
+    <script>
+        $(function() {
+            // a workaround for a flaw in the demo system (http://dev.jqueryui.com/ticket/4375), ignore!
+            $( "#dialog:ui-dialog" ).dialog( "destroy" );
 
-        {%for comment in work.comments%}
-        <div>Title: {{comment.title}}</div>
-        <div>Author: {{comment.author}}</div>
-        <div>Time: {{comment.date}}</div>
-        <br>
-        <pre>{{comment.content}}</pre>
-        <div>You can comment this comment.</div>
-        <form method="post" name="commentAcommment">
-            <textarea rows="5" cols="50" name="commentContent"></textarea>
-            <input type="hidden" name="commentID" value={{comment.commentID}}>
+            var title = $( "#title" ),
+                    commentContent = $( "#commentContent" );
+            var score = $( "#score"),
+                    uploadID = $("#uploadID");
 
-        <input type="submit" name="submit" value="commentThis">
-        </form>
-            {% if comment.comments%}
-            {%for item in comment.comments%}
-            <div><b>{{item.author}}</b></div>
-            <div>{{item.date}}</div>
-            <pre>{{item.content}}</pre>
-            <div>................................................</div>
-            {% endfor%}
-            {% endif%}
-        <hr>
-        {%endfor%}
-        {% endif%}
+            allFields = $( [] ).add( title ).add( commentContent);
+
+            scoreFields = $([]).add(score).add(uploadID);
+
+            $( "#dialog-form" ).dialog({
+                autoOpen: false,
+                height: 300,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Create a comment": function() {
+
+                            $("#createForm").submit();
+                            $( this ).dialog( "close" );
+
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                close: function() {
+                    allFields.val( "" ).removeClass( "ui-state-error" );
+                }
+            });
+
+            $( "#create-comment" )
+                    .button()
+                    .click(function() {
+                        $( "#dialog-form" ).dialog( "open" );
+                    });
+
+            $( "#grade-form" ).dialog({
+                autoOpen: false,
+                height: 300,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Grade": function() {
+
+                        $("#gradeForm").submit();
+                        $( this ).dialog( "close" );
+
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                close: function() {
+                    scoreFields.val( "" ).removeClass( "ui-state-error" );
+                }
+            });
+
+            $( "#grade-this" )
+                    .button()
+                    .click(function() {
+                        $( "#grade-form" ).dialog( "open" );
+                    });
+        });
+
+        $(document).ready(function(){
+            $('.slider')._TMS({
+                show:0,
+                pauseOnHover:true,
+                prevBu:false,
+                nextBu:false,
+                playBu:false,
+                duration:1000,
+                preset:'fade',
+                pagination:true,
+                pagNums:false,
+                slideshow:7000,
+                numStatus:true,
+                banners:'fromRight',
+                waitBannerAnimation:false,
+                progressBar:false
+            })
+        });
+    </script>
+
+    <!--[if lt IE 8]>
+    <div style=' clear: both; text-align:center; position: relative;'>
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+            <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
+        </a>
+    </div>
+    <![endif]-->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/js/html5.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/ie.css">
+    <![endif]-->
+</head>
+<body>
 
 
-    </form>
-    <a href="/login">Sign out</a>
-    </body>
+
+<div class="main">
+    <!--==============================header=================================-->
+    <header>
+        <div id = "logo"><a href="index.html"><img src="/images/logo3.png" alt=""></a></div>
+        <div id = "welcom"><div>Welcome {{user.name}}!</div>
+        <div ><a href = "/login" >Sign Out</a></div>
+        <div class="clear"></div>
+        <nav class="box-shadow">
+            <div>
+                <ul class="menu">
+                    <li class="home-page current"><a href="/student/home"><span></span></a></li>
+                    <li><a href="/student/team">Team</a></li>
+                    <li><a href="/student/assignment">Assignments</a></li>
+                    <li><a href="/student/product">Products</a></li>
+                    <li><a href="/student/myscore">My Score</a></li>
+                    {%if user.leader%}
+                    <li><a href="/student/leadership">LeaderShip</a></li>
+                    {% endif%}
+
+                </ul>
+                <div class="clear"></div>
+            </div>
+        </nav>
+    </header>
+    <!--==============================content================================-->
+    <section id="content"><div class="ic"></div>
+        <div class="container_12">
+            <div class="grid_12">
+                <h1>{{assignment.assignmentName}} Discussion Page.</h1>
+
+                <div class="wrap block-3 pad-2">
+
+                    <div id="dialog-form" title="Create a comment">
+                        <p class="validateTips">All form fields are required.</p>
+
+                        <form method="post" name="createForm" id="createForm">
+                            <fieldset>
+                                <label for="title">Title</label>
+                                <input type="text" name="title" id="title" class="text ui-widget-content ui-corner-all" />
+
+                                <label for="commentContent">Content</label>
+                                <textarea name="commentContent" id="commentContent" rows="2" cols="60" class="text ui-widget-content ui-corner-all" ></textarea>
+
+                            </fieldset>
+                        </form>
+                    </div>
+
+                    <div id="grade-form" title="Grade">
+                        <p class="validateTips">grade should between [0,100].</p>
+
+                        <form method="post" name="gradeForm" id="gradeForm">
+                            <fieldset>
+                                <label for="uploadID">Work number{{work.uploadID}} will be graded.</label>
+                                <input type="hidden" name="uploadID" id="uploadID" value={{work.uploadID}} class="text ui-widget-content ui-corner-all"/>
+                                <label for="score">Score</label>
+                                <input type="text" name="score" id="score" class="text ui-widget-content ui-corner-all" />
+
+                            </fieldset>
+                        </form>
+                    </div>
+
+
+                    <form method="post">
+                        {% if assignment%}
+                        <div><a href="/assignmentwall?assignmentName={{assignment.assignmentName}}">
+                            Assignment name:  {{assignment.assignmentName}}</a>
+                        </div>
+                        {% for tag in assignment.tags%}
+                        <div><a href="/tagcollection?tagName={{tag.tags.tagName}}">{{tag.tags.tagName}}</a> x {{tag.tags.tagAmount}}</div>
+                        {% endfor%}
+                        <div>Author: {{assignment.author}}</div>
+                        <div>Release time: {{assignment.releaseTime}}</div>
+                        <div>Due date: {{assignment.deadLine}}</div>
+                        {%endif%}
+
+                        <hr>
+                        {% if work%}
+                        <div>Your teammate {{work.author}} uploaded this homework</div>
+                        <div>Title: {{work.title}}</div>
+                        <div>Version: {{work.version}}</div>
+                        <div>Date: {{work.date}}</div>
+                        <div>Votes: {{work.votes}}</div>
+                        <div>Description: </div>
+                        <div>{{work.description}}</div>
+                    </form>
+                    <div>
+                        <button id="create-comment">Comment</button>
+                        <button id="grade-this">Grade</button>
+                        <a href="/student/download?assignmentName={{assignment.assignmentName}}" class="button">Download</a>
+                        <div><b>{{error}}{{message}}</b></div>
+
+                        <hr>
+
+                        {%for comment in work.comments%}
+                        <div>Title: {{comment.title}}</div>
+                        <div>Author: {{comment.author}}</div>
+                        <div>Time: {{comment.date}}</div>
+                        <br>
+                        <pre>{{comment.content}}</pre>
+
+                        {%if replyMode%}
+                        {% ifequal commentID comment.commentID%}
+                        <div>You can comment this comment.</div>
+                        <form method="post" name="commentAcommment">
+                            <textarea rows="5" cols="50" name="commentContent"></textarea>
+                            <input type="hidden" name="commentID" value={{comment.commentID}}>
+
+                            <input type="image" src="/images/comment.png" width="50" height="25"  name="submit" value="commentThis" ALT="reply">
+                        </form>
+                        {% endifequal%}
+                        {% else%}
+                        <a href="/student/teamworkcomments?uploadID={{work.uploadID}}&reply=yes&commentID={{comment.commentID}}" class="button">Reply</a>
+                        {%endif%}
+
+                        {% if comment.comments%}
+                        {%for item in comment.comments%}
+                        <div>{{item.author}} reply at {{item.date}}</div>
+                        <pre>{{item.content}}</pre>
+
+                        {% endfor%}
+                        {% endif%}
+                        <hr>
+                        {%endfor%}
+                        {% endif%}
+
+
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="aside">
+            <div class="container_12">
+                <div class="grid_12">
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </section>
+</div>
+<!--==============================footer=================================-->
+<footer>
+    <p>System Analysis & Design Project:  <a href="http://my.ss.sysu.edu.cn/wiki/display/sad/Semester+Project+-+MyHomework" target="_blank">MyHomework</a>
+    <p>by Group :KaiShuiPaoFan</p>
+</footer>
+
+</body>
 </html>

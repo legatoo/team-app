@@ -23,12 +23,12 @@ class reviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
         assignmentName = self.request.get('assignmentName')
 
         user_cookie = self.request.cookies.get('user')
-        username = cookieUsername(user_cookie).name
-
-        (teams,assignment) = queryStudentWorks(assignmentName)
+        user = cookieUsername(user_cookie)
+        templateValues['user'] = user
+        (teams,assignment) = queryStudentWorks()
         templateValues['teams'] = teams
         templateValues['assignment'] = assignment
-        templateValues['username'] = username
+        templateValues['username'] = user.name
         templateValues['message'] = message
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)

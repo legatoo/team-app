@@ -6,6 +6,8 @@ from datetime import  datetime
 import  webapp2
 
 from google.appengine.ext import db
+from google.appengine.ext.blobstore import blobstore
+from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 from dataTable import Users
 from dataTable import Team
@@ -15,12 +17,16 @@ from dataTable import delete_student
 from dataTable import query_tags
 from dataTable import ifAssignmentNameOK
 from dataTable import createAssignment
-from dataTable import query_assigments
+from dataTable import queryStudentWorks
 from dataTable import updateAssignment
-from dataTable import query_teams
 from dataTable import lockTeam
 from dataTable import cookieUsername
+from dataTable import ifUsernameOK
+from dataTable import addStudent
+from dataTable import UplaodWork
+from dataTable import ifScored
 
+editMode =  False
 
 def tagDigest(tags):
     tagList = tags.split(';')
@@ -29,7 +35,7 @@ def tagDigest(tags):
 def returnCSV():
     students = Users.all()
 
-    cvs = "Name,Team,Role,Assignment,PersonScore,PersonRank,Votes,TeamScore,TeamRank\n"
+    csv = "Name,Team,Role,Assignment,PersonScore,PersonRank,Votes,TeamScore,TeamRank\n"
     for student in students:
         teamName = None
         team = Team.all().filter('teamID = ',student.teamID).get()
@@ -37,44 +43,84 @@ def returnCSV():
             teamName = team.teamName
         for score in student.scores:
             if score:
-                cvs += str(student.name)+','
-                cvs += str(teamName)+','
-                cvs += str(student.teamRole)+','
-                cvs += str(score.assignmentName)+','
-                cvs += str(score.personScore)+','
-                cvs += str(score.personRank)+','
-                cvs += str(score.votes)+','
-                cvs += str(score.teamScore)+','
-                cvs += str(score.teamRank)+'\n'
-    return cvs
+                csv += str(student.name)+','
+                csv += str(teamName)+','
+                csv += str(student.teamRole)+','
+                csv += str(score.assignmentName)+','
+                csv += str(score.personScore)+','
+                csv += str(score.personRank)+','
+                csv += str(score.votes)+','
+                csv += str(score.teamScore)+','
+                csv += str(score.teamRank)+'\n'
+    return csv
 
-class teacherHanlder(webapp2.RequestHandler):
+class teacherHomeHanlder(webapp2.RequestHandler):
     def render_page(self,editMessage = '',message=''):
         templateValues = {}
 
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
 
-        templateValues['username'] = username
-        students = query_students()
-        assignments = query_assigments()
-        teams = query_teams()
-        if students:
-            templateValues['students'] = students
-        else:
-            templateValues['error'] = 'No available student'
-        if assignments:
-            templateValues['assignments'] = assignments
-        if teams:
-            templateValues['teams'] = teams
-        templateValues['editMessage'] = editMessage
-        templateValues['message'] = message
-        form = os.path.join(os.path.dirname(__file__),'templates/teacher.html')
+        user =  Users.all().filter('name = ',username).get()
+
+        form = os.path.join(os.path.dirname(__file__),'teacher/index.html')
+        templateValues['user'] = user
         renderForm = template.render(form,templateValues)
         self.response.out.write(renderForm)
 
     def get(self):
         self.render_page()
+
+    def post(self):
+        submit = self.request.get('submit')
+        if submit == 'reviewAssignment':
+            assignmentName = self.request.get('reviewTarget')
+            self.redirect('/teacher/review?assignmentName='+assignmentName)
+        if submit == 'lock':
+            lockTarget = self.request.get('lockTarget')
+            lockTeam(lockTarget)
+            self.render_page(message = 'team locked!')
+
+class teacherTeamHandler(webapp2.RequestHandler):
+    def render_page(self,message=''):
+        templateValues = {}
+
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+
+        user =  Users.all().filter('name = ',username).get()
+        teams = Team.all().fetch(20)
+        form = os.path.join(os.path.dirname(__file__),'teacher/team.html')
+        if teams:
+            templateValues['teams'] = teams
+        templateValues['user'] = user
+        renderForm = template.render(form,templateValues)
+        self.response.out.write(renderForm)
+
+    def get(self):
+        self.render_page()
+    def post(self):
+        submit = self.request.get('submit')
+        if submit == 'lock':
+            lockTarget = self.request.get('lockTarget')
+            lockTeam(lockTarget)
+            self.render_page(message = 'team locked!')
+
+class teacherStuHandler(webapp2.RequestHandler):
+    def get(self):
+        self.render_page()
+    def render_page(self,error=''):
+        form = os.path.join(os.path.dirname(__file__),'teacher/student.html')
+        templateValues = {}
+        user_cookie = self.request.cookies.get('user')
+        user = cookieUsername(user_cookie)
+        templateValues['user'] = user
+        students = query_students()
+        if students:
+            templateValues['students'] = students
+        templateValues['error'] = error
+        renderPage = template.render(form,templateValues)
+        self.response.out.write(renderPage)
 
     def post(self):
         submit = self.request.get('submit')
@@ -84,26 +130,64 @@ class teacherHanlder(webapp2.RequestHandler):
                 deleteTarget = self.request.get('deleteTarget')
                 delete_student(deleteTarget)
                 self.render_page()
-        if submit == 'Add Student':
-            self.redirect('/addstudent')
-        if submit == 'releaseAssignment':
-            self.redirect('/releaseassignment')
-        if submit == 'editAssignment':
-            assignmentName = self.request.get('editTarget')
-            now = datetime.now()
-            deadLine = Assignment.all().filter('assignmentName = ',assignmentName).get().deadLine
-            if now < deadLine:
-                self.redirect('/editassignment?assignmentName='+assignmentName)
+        else:
+            username = self.request.get('name')
+            studentID = self.request.get('studentID')
+            email = self.request.get('email')
+            password = self.request.get('password')
+            if not ifUsernameOK(username):
+                paraTuple = (username,password,int(studentID),email,'student')
+                addStudent(paraTuple)
+                self.render_page()
             else:
-                self.render_page(editMessage='You can not edit a expired assignment')
-        if submit == 'reviewAssignment':
-            assignmentName = self.request.get('reviewTarget')
-            self.redirect('/teacher/review?assignmentName='+assignmentName)
-        if submit == 'lock':
-            lockTarget = self.request.get('lockTarget')
-            lockTeam(lockTarget)
-            self.render_page(message = 'team locked!')
+                self.render_page(error='Student has already exited!')
 
+class teacherAssignmentHandler(webapp2.RequestHandler):
+    def render_page(self,error='',editMessage=''):
+        global editMode
+        assignmentName = self.request.get('assignmentName')
+        templateValues = {}
+        if assignmentName:
+            editMode = True
+            templateValues['editMode'] = True
+            assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
+            templateValues['assignment'] = assignment
+            templateValues['error'] = error
+        else:
+            assignments = Assignment.all().fetch(20)
+            if assignments:
+                templateValues['assignments'] = assignments
+
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        user =  Users.all().filter('name = ',username).get()
+
+        form = os.path.join(os.path.dirname(__file__),'teacher/assignment.html')
+        templateValues['user'] = user
+
+        renderForm = template.render(form,templateValues)
+        self.response.out.write(renderForm)
+    def get(self):
+        self.render_page()
+    def post(self):
+        global editMode
+        dueTime = self.request.get('deadLine')
+        deadlineDMY = dueTime.split('/')
+        deadline = datetime(
+            int(deadlineDMY[2]),
+            int(deadlineDMY[0]),
+            int(deadlineDMY[1]),
+        )
+        now = datetime.now()
+        if deadline < now:
+            editMode = False
+            self.render_page(error='Due time invalid! You can\'t edit this assignment')
+        else:
+            assignmentName = self.request.get('assignmentName')
+            assignmentContent = self.request.get('assignmentContent')
+            updateAssignment(assignmentName,deadline,assignmentContent)
+            editMode = False
+            self.redirect('/teacher/assignment')
 
 
 class releaseAssignmentHandler(webapp2.RequestHandler):
@@ -115,7 +199,7 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                     assignmentContent='',
                     contentError='',
                     deadLineError=''):
-        form = os.path.join(os.path.dirname(__file__),'templates/releaseassignment.html')
+        form = os.path.join(os.path.dirname(__file__),'teacher/releaseassignment.html')
         templateValues = {}
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
@@ -185,52 +269,53 @@ class releaseAssignmentHandler(webapp2.RequestHandler):
                 }
             createAssignment(paraDictionary)
 
-            self.redirect('/teacher')
+            self.redirect('/teacher/assignment')
 
-class editAssignmentHandler(webapp2.RequestHandler):
-    def get(self):
-        self.render_page()
+class teacherReviewHandler(blobstore_handlers.BlobstoreDownloadHandler):
 
-    def render_page(self,error = ''):
-        form = os.path.join(os.path.dirname(__file__),'templates/editassignment.html')
+    def render_page(self,message = ''):
+        form = os.path.join(os.path.dirname(__file__),'teacher/review.html')
         templateValues = {}
-        assignmentName = self.request.get('assignmentName')
-        assignment = Assignment.all().filter('assignmentName = ',assignmentName).get()
-        templateValues['assignment'] = assignment
-        templateValues['error'] = error
+
+        user_cookie = self.request.cookies.get('user')
+        username = cookieUsername(user_cookie).name
+        user = Users.all().filter('name = ',username).get()
+        (teams,assignments) = queryStudentWorks()
+        templateValues['teams'] = teams
+        templateValues['assignments'] = assignments
+        templateValues['user'] = user
+        templateValues['message'] = message
         renderPage = template.render(form,templateValues)
         self.response.out.write(renderPage)
 
+    def get(self):
+        self.render_page()
     def post(self):
-        deadLine = datetime( int(self.request.get('year')),
-            int(self.request.get('month')),
-            int(self.request.get('day')))
-        now = datetime.now()
-        if deadLine < now:
-            self.render_page(error='Due time invalid!')
-        else:
-            assignmentName = self.request.get('assignmentName')
-            assignmentContent = self.request.get('assignmentContent')
-            updateAssignment(assignmentName,deadLine,assignmentContent)
-            self.redirect('/teacher')
+
+        uploadID = int(self.request.get('target'))
+        sourceCode_key = UplaodWork.all().filter('uploadID = ',uploadID).get().sourceCode.key()
+        self.send_blob(blobstore.BlobInfo.get(sourceCode_key), save_as=True)
+
 
 class csvHandler(webapp2.RequestHandler):
     def get(self):
-        user_cookie = self.request.cookies.get('user')
-        username = cookieUsername(user_cookie).name
 
         user_cookie = self.request.cookies.get('user')
         username = cookieUsername(user_cookie).name
         user = Users.all().filter('name = ',username).get()
         if user.role == 'teacher':
             csvFormatScore = returnCSV()
-            self.response.headers.add_header(str('Content-Disposition'), str('attachment;filename='+username+'.csv'))
+            self.response.headers.add_header(str('Content-Disposition'), str('attachment;filename=studentScores.csv'))
             self.response.out.write(csvFormatScore)
         else:
             self.response.out.write('Permission denied!')
 
 
-app = webapp2.WSGIApplication([('/teacher',teacherHanlder),
-                               ('/releaseassignment',releaseAssignmentHandler),
-                               ('/editassignment',editAssignmentHandler),
+app = webapp2.WSGIApplication([('/teacher/home',teacherHomeHanlder),
+                               ('/teacher/team',teacherTeamHandler),
+                               ('/teacher/students',teacherStuHandler),
+                               ('/teacher/assignment',teacherAssignmentHandler),
+                               ('/teacher/review',teacherReviewHandler),
+                               ('/teacher/releaseassignment',releaseAssignmentHandler),
+                               ('/teacher/review',teacherReviewHandler),
                                ('/teacher.csv',csvHandler)],debug=True)

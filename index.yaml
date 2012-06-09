@@ -17,6 +17,12 @@ indexes:
   - name: personScore
     direction: desc
 
+- kind: Score
+  properties:
+  - name: team
+  - name: personScore
+    direction: desc
+
 - kind: TeamScore
   properties:
   - name: assignment
@@ -28,6 +34,11 @@ indexes:
   - name: assignments
   - name: date
     direction: desc
+
+- kind: UplaodWork
+  properties:
+  - name: teams
+  - name: assignmentName
 
 - kind: Users
   properties:

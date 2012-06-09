@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Review</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/reset.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/grid_12.css">
+    <link href='http://fonts.googleapis.com/css?family=Condiment' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
+    <script src="/js/jquery-1.7.2.min.js"></script>
+    <script src="/js/jquery.easing.1.3.js"></script>
+	<!--[if lt IE 8]>
+       <div style=' clear: both; text-align:center; position: relative;'>
+         <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+           <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
+        </a>
+      </div>
+    <![endif]-->
+    <!--[if lt IE 9]>
+   		<script type="text/javascript" src="/js/html5.js"></script>
+    	<link rel="stylesheet" type="text/css" media="screen" href="/css/ie.css">
+	<![endif]-->
+</head>
+<body>
+  <div class="main">
+  <!--==============================header=================================-->
+    <header>
+       <div id = "logo"><a href="index.html"><img src="/images/logo3.png" alt=""></a></div>
+        <div id = "welcom">Welcome Qing Wang!</div>
+		<div ><a href = "/login" >Sign Out</a></div>
+       
+        <div class="clear"></div>    
+        <nav class="box-shadow">
+            <div>
+                <ul class="menu">
+                    <li class="home-page current"><a href="/teacher/home"><span></span></a></li>
+                    <li><a href="/teacher/team">Team</a></li>
+                    <li><a href="/teacher/assignment">Assignments</a></li>
+                    <li><a href="/teacher/students">Students</a></li>
+					<li><a href="/teacher/review">Review</a></li>
+    
+                </ul>
+           
+                <div class="clear"></div>
+            </div>
+        </nav>
+    </header>   
+  <!--==============================content================================-->
+    <section id="content"><div class="ic"></div>
+        <div class="container_12">	
+          <div class="grid_12">
+            <div class="wrap pad-3">
+      	          <h3 >{{user.name}}, welcome to review students' works!</h3>
+                  <br>
+                  <h4>You can export students' scores in csv formant.</h4>
+                  <a href="/teacher.csv" class="button">Export</a>
+                <hr>
+                <form method="post">
+                    {% if assignments %}
+                    {% for assignment in assignments%}
+                    <div><b>Assignment name: {{assignment.assignmentName}}</b></div>
+                    <div><b>Assignment author: {{assignment.author}}</b></div>
+                    <div><b>Assignment deadline: {{assignment.deadLine}}</b></div>
+
+                    <div><b>This assignment has these works:</b></div>
+
+                    {% for team in teams%}
+                    <div>
+                        Team: {{team.teamName}}   <a href="/teacher/grade?teamID={{team.teamID}}&assignmentName={{assignment.assignmentName}}" class="button">Score</a>
+                    </div>
+                    {% for upload in team.works%}
+                    {% ifequal upload.assignmentName assignment.assignmentName%}
+                    {%ifequal upload.status "active"%}
+                    <dl>
+
+
+                        <dd> -Uploader: {{upload.author}}</dd>
+                        <dd> -Version: {{upload.version}}</dd>
+                        <dd> -Date: {{upload.date}}</dd>
+                        <dd> -Filename: {{upload.filename}}</dd>
+
+                    </dl>
+                    <div>
+                        <form method="post" name="downloadForm">
+                            <input type="hidden" name="target" value={{upload.uploadID}}>
+                            <input type="image" src="/images/download.png" width="50" height="23" name="submit" alt="submit">
+                        </form>
+
+                    </div>
+                    {%endifequal%}
+                   {% endifequal%}
+                   {% endfor%}
+                    <div>------------------------------------------------------------------</div>
+                   {% endfor%}
+
+                    <hr>
+
+                    {%endfor%}
+                    {%endif%}
+                    <div><b>{{message}}</b></div>
+                </form>
+            </div>
+          </div>
+          <div class="clear"></div>
+        </div>
+    </section> 
+  </div>    
+<!--==============================footer=================================-->
+     <footer>
+		<p>System Analysis & Design Project:  <a href="http://my.ss.sysu.edu.cn/wiki/display/sad/Semester+Project+-+MyHomework" target="_blank">MyHomework</a>
+        <p>by Group :KaiShuiPaoFan</p>
+    </footer>		    
+</body>
+</html>
